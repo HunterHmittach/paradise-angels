@@ -2,16 +2,14 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import supabaseAdmin from "@/lib/supabase-admin";
 
-export const runtime = "nodejs"; // belangrijk voor Stripe
+export const runtime = "nodejs";
 
-const secretKey = process.env.STRIPE_SECRET_KEY!;
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
-
-const stripe = new Stripe(secretKey, {
-  apiVersion: "2025-12-15.clover", // match jouw types
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2025-12-15.clover",
 });
 
 export async function POST(req: Request) {
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!webhookSecret) {
     return NextResponse.json({ error: "Missing STRIPE_WEBHOOK_SECRET" }, { status: 500 });
   }
@@ -31,29 +29,35 @@ export async function POST(req: Request) {
   }
 
   try {
-    // PaymentIntent succesvol
-    if (event.type === "payment_intent.succeeded") {
+    if (event.type === "payment_intent.succeeded" || event.type === "payment_intent.payment_failed") {
       const pi = event.data.object as Stripe.PaymentIntent;
-      const orderId = pi.metadata?.order_id;
 
+      const newStatus = event.type === "payment_intent.succeeded" ? "paid" : "failed";
+
+      // 1) Update op payment_intent (beste, want dat heb je in je URL)
+      const byPi = await supabaseAdmin
+        .from("orders")
+        .update({ status: newStatus })
+        .eq("payment_intent", pi.id);
+
+      // 2) Extra: als metadata.order_id wél bestaat, ook op id updaten
+      const orderId = pi.metadata?.order_id;
       if (orderId) {
-        await supabaseAdmin
-          .from("orders")
-          .update({ status: "paid" })
-          .eq("id", Number(orderId));
+        const { data, error } = await supabaseAdmin
+       .from("orders")
+       .update({ status: "paid" })
+       .eq("id", Number(orderId))
+       .select();
+
+       console.log("WEBHOOK orderId:", orderId);
+       console.log("SUPABASE result:", data);
+       console.log("SUPABASE error:", error);
+
       }
-    }
 
-    // Payment failed (optioneel)
-    if (event.type === "payment_intent.payment_failed") {
-      const pi = event.data.object as Stripe.PaymentIntent;
-      const orderId = pi.metadata?.order_id;
-
-      if (orderId) {
-        await supabaseAdmin
-          .from("orders")
-          .update({ status: "failed" })
-          .eq("id", Number(orderId));
+      // Optioneel: check errors
+      if (byPi.error) {
+        return NextResponse.json({ error: byPi.error.message }, { status: 500 });
       }
     }
 
