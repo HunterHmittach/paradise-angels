@@ -7,29 +7,30 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-12-15.clover",
 });
 
+function getWebhookSecret() {
+  // Op Vercel wil je de Stripe Dashboard webhook secret gebruiken
+  if (process.env.VERCEL) return process.env.STRIPE_WEBHOOK_SECRET;
+
+  // Lokaal (stripe listen) wil je de CLI secret gebruiken
+  return process.env.STRIPE_CLI_WEBHOOK_SECRET || process.env.STRIPE_WEBHOOK_SECRET;
+}
+
 export async function POST(req: Request) {
   const sig = req.headers.get("stripe-signature");
   if (!sig) {
-    return NextResponse.json(
-      { error: "Missing stripe-signature header" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Missing stripe-signature header" }, { status: 400 });
   }
 
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  const secret = getWebhookSecret();
   if (!secret) {
-    return NextResponse.json(
-      { error: "Missing STRIPE_WEBHOOK_SECRET env var" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Missing webhook secret env var" }, { status: 500 });
   }
 
-  // ✅ BELANGRIJK: Stripe signeert de rauwe bytes, niet tekst
-  const rawBody = Buffer.from(await req.arrayBuffer());
+  // ✅ BELANGRIJK: raw bytes gebruiken (niet req.text())
+  const buf = Buffer.from(await req.arrayBuffer());
 
-  let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(rawBody, sig, secret);
+    stripe.webhooks.constructEvent(buf, sig, secret.trim());
   } catch (err: any) {
     return NextResponse.json(
       { error: `Webhook signature failed: ${err?.message || "unknown"}` },
@@ -37,8 +38,5 @@ export async function POST(req: Request) {
     );
   }
 
-  // Debug (mag blijven): hiermee zie je of hij echt binnenkomt
-  // console.log("✅ Stripe webhook verified:", event.type);
-
-  return NextResponse.json({ received: true, type: event.type }, { status: 200 });
+  return NextResponse.json({ received: true }, { status: 200 });
 }
