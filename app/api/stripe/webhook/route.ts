@@ -7,19 +7,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-12-15.clover",
 });
 
-function getSigningSecret() {
-  // Op Vercel wil je de Dashboard/Webhook secret gebruiken
-  if (process.env.VERCEL) {
-    return (process.env.STRIPE_WEBHOOK_SECRET || "").trim();
-  }
-
-  // Lokaal: als je stripe listen gebruikt -> CLI secret, anders fallback
-  return (
-    (process.env.STRIPE_WEBHOOK_SECRET || "").trim() ||
-    (process.env.STRIPE_WEBHOOK_SECRET || "").trim()
-  );
-}
-
 export async function POST(req: Request) {
   const sig = req.headers.get("stripe-signature");
   if (!sig) {
@@ -29,20 +16,20 @@ export async function POST(req: Request) {
     );
   }
 
-  const secret = getSigningSecret();
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secret) {
     return NextResponse.json(
-      { error: "Missing webhook signing secret env var" },
+      { error: "Missing STRIPE_WEBHOOK_SECRET env var" },
       { status: 500 }
     );
   }
 
-  // ✅ BELANGRIJK: raw bytes, niet text()
-  const buf = Buffer.from(await req.arrayBuffer());
+  // ✅ BELANGRIJK: Stripe signeert de rauwe bytes, niet tekst
+  const rawBody = Buffer.from(await req.arrayBuffer());
 
-  let event: Stripe.Event;''
-    event = stripe.webhooks.constructEvent(buf, sig, secret);
-  try {return NextResponse.json({ ok: true, marker: "WEBHOOK_V2_ARRAYBUFFER" }, { status: 200 });
+  let event: Stripe.Event;
+  try {
+    event = stripe.webhooks.constructEvent(rawBody, sig, secret);
   } catch (err: any) {
     return NextResponse.json(
       { error: `Webhook signature failed: ${err?.message || "unknown"}` },
@@ -50,6 +37,8 @@ export async function POST(req: Request) {
     );
   }
 
-  // hier later je order update doen op basis van event.type
-  return NextResponse.json({ received: true }, { status: 200 });
+  // Debug (mag blijven): hiermee zie je of hij echt binnenkomt
+  // console.log("✅ Stripe webhook verified:", event.type);
+
+  return NextResponse.json({ received: true, type: event.type }, { status: 200 });
 }
