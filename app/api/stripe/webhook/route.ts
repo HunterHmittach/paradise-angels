@@ -9,6 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: Request) {
   const sig = req.headers.get("stripe-signature");
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
 
   if (!sig) {
     return NextResponse.json(
@@ -17,20 +18,27 @@ export async function POST(req: Request) {
     );
   }
 
+  if (!secret) {
+    return NextResponse.json(
+      { error: "Missing STRIPE_WEBHOOK_SECRET env var" },
+      { status: 500 }
+    );
+  }
+
   const rawBody = await req.text();
 
+  let event: Stripe.Event;
   try {
-    stripe.webhooks.constructEvent(
-      rawBody,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
+    event = stripe.webhooks.constructEvent(rawBody, sig, secret);
   } catch (err: any) {
     return NextResponse.json(
-      { error: `Webhook signature verification failed: ${err.message}` },
+      { error: `Webhook signature failed: ${err.message}` },
       { status: 400 }
     );
   }
+
+  // ✅ Webhook is verified here
+  // TODO: hier jouw order update doen op basis van event.type
 
   return NextResponse.json({ received: true }, { status: 200 });
 }
