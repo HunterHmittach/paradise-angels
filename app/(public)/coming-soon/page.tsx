@@ -26,6 +26,23 @@ export default function ComingSoon() {
         <p className="text-xs tracking-[0.6em] text-neutral-500 mb-16">
           A NEW ERA IS COMING
         </p>
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+       <svg
+        viewBox="0 0 800 400"
+        className="w-[900px] opacity-[0.06]"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+         >
+         <path
+         d="M50 200 C150 50, 250 50, 350 200 C250 150,150 150,50 200 Z"
+         fill="#9f9f9f"
+         />
+         <path
+         d="M750 200 C650 50, 550 50, 450 200 C550 150,650 150,750 200 Z"
+         fill="#9f9f9f"
+         />
+         </svg>
+         </div>
 
         <h1 className="font-serif text-[110px] md:text-[160px] leading-[0.85] tracking-tight">
           <span className="block">PARADISE</span>
