@@ -1,63 +1,51 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const ADMIN_PATH = "/0207"; // <-- jouw geheime pad
-
-function unauthorized() {
-  return new NextResponse("Auth required", {
-    status: 401,
-    headers: {
-      "WWW-Authenticate": 'Basic realm="Admin Preview"',
-    },
-  });
-}
+const MAINTENANCE = process.env.MAINTENANCE_MODE === "1";
+const PREVIEW_KEY = process.env.PREVIEW_KEY;
 
 export function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+  if (!MAINTENANCE) return NextResponse.next();
 
-  // Altijd toestaan (anders breekt Next/Stripe)
+  const { pathname, searchParams } = req.nextUrl;
+
+  // Altijd toestaan
   if (
-    pathname.startsWith("/coming-soon") ||
     pathname.startsWith("/_next") ||
-    pathname === "/favicon.ico" ||
-    pathname.startsWith("/api/stripe/webhook")
+    pathname.startsWith("/favicon") ||
+    pathname.startsWith("/robots.txt") ||
+    pathname.startsWith("/sitemap") ||
+    pathname.startsWith("/coming-soon") ||
+    pathname.startsWith("/api") // laat API's werken (Stripe webhooks etc.)
   ) {
     return NextResponse.next();
   }
 
-  // Als ik al ingelogd bent (cookie) -> echte site
-  const hasPreview = req.cookies.get("site_preview")?.value === "1";
-  if (hasPreview) return NextResponse.next();
+  // Jij mag bypass'en via cookie
+  const hasPreviewCookie = req.cookies.get("pa_preview")?.value === "1";
+  if (hasPreviewCookie) return NextResponse.next();
 
-  // Alleen mijn geheime link vraagt login popup
-  if (pathname === ADMIN_PATH) {
-    const auth = req.headers.get("authorization");
-    if (!auth?.startsWith("Basic ")) return unauthorized();
-
-    const base64 = auth.split(" ")[1]!;
-    const [user, pass] = Buffer.from(base64, "base64").toString().split(":");
-
-    if (
-      user !== process.env.BASIC_AUTH_USER ||
-      pass !== process.env.BASIC_AUTH_PASS
-    ) {
-      return unauthorized();
-    }
-
-    // Login OK -> cookie zetten en door naar echte site
+  // Jij kan unlocken via ?key=...
+  const key = searchParams.get("key");
+  if (PREVIEW_KEY && key === PREVIEW_KEY) {
     const res = NextResponse.redirect(new URL("/", req.url));
-    res.cookies.set("site_preview", "1", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
+    res.cookies.set("pa_preview", "1", {
       path: "/",
-      maxAge: 60 * 60 * 24 * 30, // 30 dagen
+      maxAge: 60 * 60 * 24 * 7, // 7 dagen
+      httpOnly: true,
+      sameSite: "lax",
+      secure: true,
     });
     return res;
   }
 
-  // Iedereen anders -> Coming Soon
+  // Iedereen anders → coming soon
   const url = req.nextUrl.clone();
   url.pathname = "/coming-soon";
-  return NextResponse.redirect(url);
+  url.search = "";
+  return NextResponse.rewrite(url);
 }
+
+export const config = {
+  matcher: ["/((?!_next/static|_next/image).*)"],
+};

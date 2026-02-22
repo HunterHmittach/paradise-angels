@@ -1,17 +1,11 @@
 export default function ComingSoon() {
   return (
-    <main className="min-h-screen bg-black flex items-center justify-center text-center px-6">
-      <div>
-        <h1 className="text-6xl font-bold text-white tracking-widest">
-          PARADISE
+    <main className="min-h-screen flex items-center justify-center px-6">
+      <div className="text-center">
+        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
+          PARADISE <span className="text-yellow-500">ANGELS</span>
         </h1>
-        <h2 className="text-6xl font-bold text-yellow-500 tracking-widest mt-2">
-          ANGELS
-        </h2>
-
-        <p className="text-gray-400 mt-8 text-lg">
-          Coming Soon.
-        </p>
+        <p className="mt-6 text-lg text-white/70">Coming soon.</p>
       </div>
     </main>
   );

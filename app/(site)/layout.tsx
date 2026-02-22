@@ -1,10 +1,9 @@
 import "../globals.css";
-
 import type { ReactNode } from "react";
 
-import CartProvider from "@/app/components/cart/CartContext";
-import ClientWrapper from "../client-wrapper";
-import { AuthProvider } from "../auth-provider";
+import CartProvider from "./components/cart/CartContext";
+import ClientWrapper from "./client-wrapper";
+import { AuthProvider } from "../auth-provider"; // <-- let op: 1 map omhoog (app/auth-provider.tsx)
 
 export const metadata = {
   title: "Paradise Angels",
