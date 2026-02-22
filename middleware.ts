@@ -1,51 +1,42 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const MAINTENANCE = process.env.MAINTENANCE_MODE === "1";
-const PREVIEW_KEY = process.env.PREVIEW_KEY;
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
-export function middleware(req: NextRequest) {
-  if (!MAINTENANCE) return NextResponse.next();
-
-  const { pathname, searchParams } = req.nextUrl;
-
-  // Altijd toestaan
+  // Skip static files and Next internals
   if (
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/favicon") ||
-    pathname.startsWith("/robots.txt") ||
-    pathname.startsWith("/sitemap") ||
-    pathname.startsWith("/coming-soon") ||
-    pathname.startsWith("/api") // laat API's werken (Stripe webhooks etc.)
+    pathname.startsWith("/api") ||
+    pathname.includes(".")
   ) {
     return NextResponse.next();
   }
 
-  // Jij mag bypass'en via cookie
-  const hasPreviewCookie = req.cookies.get("pa_preview")?.value === "1";
-  if (hasPreviewCookie) return NextResponse.next();
+  // Unlock route
+  if (pathname === "/0207") {
+    const response = NextResponse.redirect(new URL("/", request.url));
 
-  // Jij kan unlocken via ?key=...
-  const key = searchParams.get("key");
-  if (PREVIEW_KEY && key === PREVIEW_KEY) {
-    const res = NextResponse.redirect(new URL("/", req.url));
-    res.cookies.set("pa_preview", "1", {
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 dagen
+    response.cookies.set("pa_unlocked", "true", {
       httpOnly: true,
-      sameSite: "lax",
-      secure: true,
+      path: "/",
     });
-    return res;
+
+    return response;
   }
 
-  // Iedereen anders → coming soon
-  const url = req.nextUrl.clone();
-  url.pathname = "/coming-soon";
-  url.search = "";
-  return NextResponse.rewrite(url);
+  const unlocked = request.cookies.get("pa_unlocked");
+
+  // If NOT unlocked → force coming-soon
+  if (!unlocked && pathname !== "/coming-soon") {
+    return NextResponse.redirect(
+      new URL("/coming-soon", request.url)
+    );
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image).*)"],
+  matcher: "/:path*",
 };

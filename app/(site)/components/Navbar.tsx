@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/app/auth-provider";
-import { useCart } from "@/app/components/cart/CartContext"; // <-- BELANGRIJK!
+import { useCart } from "./cart/CartContext";
 
 export default function Navbar({ setCartOpen }: { setCartOpen: (v: boolean) => void }) {
     

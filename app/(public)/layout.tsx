@@ -1,10 +1,13 @@
-import "../globals.css";
 import type { ReactNode } from "react";
 
-export default function PublicLayout({ children }: { children: ReactNode }) {
+export default function PublicLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
-    <html lang="en">
-      <body className="bg-[#0d0d0d] text-white">{children}</body>
-    </html>
+    <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      {children}
+    </div>
   );
 }

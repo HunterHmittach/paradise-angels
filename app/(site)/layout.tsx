@@ -1,28 +1,25 @@
-import "../globals.css";
+"use client";
+
+import { useState } from "react";
 import type { ReactNode } from "react";
-
-import CartProvider from "./components/cart/CartContext";
 import ClientWrapper from "../client-wrapper";
-// Als jij auth-provider wil gebruiken en hij staat in app/auth-provider.tsx:
-import { AuthProvider } from "../auth-provider";
+import Navbar from "./components/Navbar";
+import CartDrawer from "./components/cart/CartDrawer";
 
-export const metadata = {
-  title: "Paradise Angels",
-  description: "Luxury fashion + visuals + creative identity brand",
-};
+export default function SiteLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const [cartOpen, setCartOpen] = useState(false);
 
-export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body className="bg-[#0d0d0d] text-white">
-        <div className="max-w-6xl mx-auto px-6">
-          <AuthProvider>
-            <CartProvider>
-              <ClientWrapper>{children}</ClientWrapper>
-            </CartProvider>
-          </AuthProvider>
-        </div>
-      </body>
-    </html>
+    <ClientWrapper>
+      <Navbar setCartOpen={setCartOpen} />
+
+      <CartDrawer open={cartOpen} setOpen={setCartOpen} />
+
+      <main>{children}</main>
+    </ClientWrapper>
   );
 }
