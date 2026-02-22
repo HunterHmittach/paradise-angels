@@ -6,7 +6,10 @@ export default function PublicLayout({
   children: ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center">
+    <div
+      style={{ background: "black", color: "white" }}
+      className="min-h-screen flex items-center justify-center"
+    >
       {children}
     </div>
   );
