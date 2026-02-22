@@ -19,84 +19,54 @@ export default function ComingSoon() {
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-[#fdfcf8] via-[#f5f2ea] to-[#efebe1] overflow-hidden flex items-center justify-center">
+    <div className="min-h-screen bg-[#f4f1ea] text-black flex items-center justify-center px-8">
 
-      {/* Soft angelic glow */}
-      <div className="absolute w-[1000px] h-[1000px] bg-yellow-300/20 blur-[220px] rounded-full"></div>
+      <div className="w-full max-w-5xl text-center">
 
-      {/* Light gold dust */}
-      <div className="absolute inset-0 pointer-events-none">
-        {[...Array(40)].map((_, i) => (
-          <span
-            key={i}
-            className="absolute w-[2px] h-[2px] bg-yellow-500 rounded-full opacity-40 animate-float"
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animationDuration: `${6 + Math.random() * 10}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="relative text-center px-8 w-full max-w-6xl">
-
-        <p className="tracking-[0.6em] text-xs text-gray-500 mb-10">
+        <p className="text-xs tracking-[0.6em] text-neutral-500 mb-16">
           A NEW ERA IS COMING
         </p>
 
-        <h1 className="text-7xl md:text-[140px] font-bold leading-[0.9]">
-          <span className="block text-black">
-            PARADISE
-          </span>
-
-          <span className="block bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600 bg-clip-text text-transparent drop-shadow-lg">
+        <h1 className="font-serif text-[110px] md:text-[160px] leading-[0.85] tracking-tight">
+          <span className="block">PARADISE</span>
+          <span className="block text-[#c6a85a]">
             ANGELS
           </span>
         </h1>
 
-        <p className="mt-12 text-gray-600 text-xl max-w-2xl mx-auto leading-relaxed">
+        <p className="mt-16 text-neutral-600 text-lg max-w-xl mx-auto leading-relaxed">
           A divine house of luxury fashion and visual identity.
-          Crafted with precision. Designed for transcendence.
+          Crafted with intention. Designed for presence.
         </p>
 
-        <div className="mt-14 w-40 h-[1px] bg-gradient-to-r from-transparent via-yellow-500 to-transparent mx-auto"></div>
+        <div className="mt-20 border-t border-neutral-300 w-32 mx-auto"></div>
 
         {!submitted ? (
-          <div className="mt-12 flex flex-col md:flex-row items-center justify-center gap-5">
+          <div className="mt-14 flex flex-col md:flex-row items-center justify-center gap-6">
+
             <input
               type="email"
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="px-8 py-4 bg-white/80 backdrop-blur-lg border border-gray-300 rounded-full focus:outline-none focus:border-yellow-500 w-80 shadow-lg"
+              className="bg-transparent border-b border-black px-4 py-3 w-72 focus:outline-none text-center tracking-wide"
             />
+
             <button
               onClick={handleSubmit}
-              className="px-10 py-4 bg-gradient-to-r from-yellow-600 to-yellow-400 text-white rounded-full font-semibold hover:scale-105 transition-all shadow-xl"
+              className="uppercase tracking-widest text-sm hover:opacity-60 transition"
             >
-              Join the Private List
+              Request Private Access
             </button>
+
           </div>
         ) : (
-          <p className="mt-10 text-green-600 font-medium">
+          <p className="mt-14 text-neutral-700 tracking-wide">
             You are now part of the inner circle.
           </p>
         )}
-      </div>
 
-      <style jsx>{`
-        @keyframes float {
-          0% { transform: translateY(0); opacity: 0; }
-          50% { opacity: 0.6; }
-          100% { transform: translateY(-200px); opacity: 0; }
-        }
-        .animate-float {
-          animation-name: float;
-          animation-iteration-count: infinite;
-          animation-timing-function: linear;
-        }
-      `}</style>
+      </div>
     </div>
   );
 }
