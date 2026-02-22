@@ -3,75 +3,52 @@
 import { useEffect, useState } from "react";
 
 export default function ComingSoon() {
-  const [timeLeft, setTimeLeft] = useState("");
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const target = new Date("2026-06-01T00:00:00").getTime();
-
-    const interval = setInterval(() => {
-      const now = new Date().getTime();
-      const difference = target - now;
-
-      if (difference <= 0) {
-        setTimeLeft("Launching...");
-        clearInterval(interval);
-        return;
-      }
-
-      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-      const hours = Math.floor(
-        (difference / (1000 * 60 * 60)) % 24
-      );
-      const minutes = Math.floor(
-        (difference / (1000 * 60)) % 60
-      );
-
-      setTimeLeft(`${days}D ${hours}H ${minutes}M`);
-    }, 1000);
-
-    return () => clearInterval(interval);
+    setTimeout(() => setLoaded(true), 300);
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-black text-white flex items-center justify-center overflow-hidden">
+    <div className="relative min-h-screen bg-black text-white overflow-hidden flex items-center justify-center">
 
-      {/* Background glow */}
-      <div className="absolute w-[800px] h-[800px] bg-yellow-500/10 blur-[200px] rounded-full"></div>
+      {/* Divine gold aura */}
+      <div className="absolute w-[900px] h-[900px] bg-gradient-to-r from-yellow-400/20 via-yellow-200/10 to-yellow-400/20 blur-[220px] rounded-full animate-pulse"></div>
 
-      <div className="relative text-center max-w-3xl px-6">
+      {/* Subtle wing lines */}
+      <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_center,_white_1px,_transparent_1px)] bg-[size:40px_40px]"></div>
 
-        <p className="tracking-[0.5em] text-sm text-gray-400 mb-6">
-          PARADISE ANGELS
+      <div className={`relative text-center px-6 transition-all duration-1000 ${loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
+
+        {/* Small label */}
+        <p className="tracking-[0.6em] text-xs text-gray-400 mb-8">
+          A NEW ERA IS COMING
         </p>
 
-        <h1 className="text-6xl md:text-8xl font-bold leading-tight">
-          PARADISE
-          <span className="block text-yellow-400">
+        {/* Main Name */}
+        <h1 className="text-7xl md:text-9xl font-bold leading-none">
+          <span className="block text-white">
+            PARADISE
+          </span>
+
+          <span className="block bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-200 bg-clip-text text-transparent">
             ANGELS
           </span>
         </h1>
 
-        <p className="mt-8 text-gray-300 text-lg md:text-xl">
-          A Creative House of Luxury Fashion,
-          Visual Identity & Angelic Expression.
+        {/* Tagline */}
+        <p className="mt-8 max-w-xl mx-auto text-gray-400 text-lg leading-relaxed">
+          A divine house of luxury fashion and visual identity.
+          Crafted for presence. Designed for transcendence.
         </p>
 
-        {/* Countdown */}
-        <div className="mt-10 text-2xl tracking-widest text-yellow-400 font-semibold">
-          {timeLeft}
-        </div>
+        {/* Divider */}
+        <div className="mt-12 w-24 h-[1px] bg-gradient-to-r from-transparent via-yellow-400 to-transparent mx-auto"></div>
 
-        {/* Email Form */}
-        <div className="mt-10 flex flex-col md:flex-row items-center justify-center gap-4">
-          <input
-            type="email"
-            placeholder="Enter your email"
-            className="px-6 py-3 bg-transparent border border-gray-600 rounded-full focus:outline-none focus:border-yellow-400 w-72"
-          />
-          <button className="px-8 py-3 bg-yellow-400 text-black rounded-full font-semibold hover:bg-yellow-300 transition">
-            Notify Me
-          </button>
-        </div>
+        {/* Coming text */}
+        <p className="mt-6 text-gray-500 tracking-widest text-sm">
+          COMING SOON
+        </p>
 
       </div>
     </div>
