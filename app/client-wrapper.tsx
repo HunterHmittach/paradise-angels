@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Navbar from "./components/Navbar";
-import CartDrawer from "./components/cart/CartDrawer";
+import Navbar from "./(site)/components/Navbar";
+import CartDrawer from "./(site)/components/cart/CartDrawer";
 import type { ReactNode } from "react";
 
 export default function ClientWrapper({ children }: { children: ReactNode }) {

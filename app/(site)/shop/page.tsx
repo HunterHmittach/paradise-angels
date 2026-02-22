@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import supabase from "@/lib/supabase";
-import { useCart } from "@/app/components/cart/CartContext";
+import { useCart } from "@/app/(site)/components
+/cart/CartContext";
 
 
 interface Product {

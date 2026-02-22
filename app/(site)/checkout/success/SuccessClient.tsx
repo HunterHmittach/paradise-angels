@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useCart } from "@/app/components/cart/CartContext";
+import { useCart } from "@/app/(site)/components
+/cart/CartContext";
 
 type Order = {
   id: number;

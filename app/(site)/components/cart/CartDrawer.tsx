@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useCart } from "@/app/components/cart/CartContext";
+import { useCart } from "@/app/(site)/components
+/cart/CartContext";
 
 export default function CartDrawer({
   open,

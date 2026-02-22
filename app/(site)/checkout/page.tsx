@@ -3,8 +3,8 @@
 import { useMemo, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
-import StripeCheckoutForm from "@/app/checkout/StripeCheckoutForm";
-import { useCart } from "@/app/components/cart/CartContext";
+import StripeCheckoutForm from "@/app/(site)/checkout/StripeCheckoutForm";
+import { useCart } from "@/app/(site)/components/cart/CartContext";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
