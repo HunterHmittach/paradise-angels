@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { ReactNode } from "react";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata = {
   title: "Paradise Angels",
@@ -13,8 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-black text-white min-h-screen">
+      <body className="min-h-screen bg-[#f4f1ea] text-black">
         {children}
+        <Analytics />
       </body>
     </html>
   );
