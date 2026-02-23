@@ -5,7 +5,6 @@ import type { ReactNode } from "react";
 import ClientWrapper from "../client-wrapper";
 import Navbar from "./components/Navbar";
 import CartDrawer from "./components/cart/CartDrawer";
-
 export default function SiteLayout({
   children,
 }: {
