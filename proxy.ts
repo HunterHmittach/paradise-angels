@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const hasAccess = request.cookies.get("pa_access");
 
   // Allow API & static files
   if (
@@ -13,12 +14,22 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 🔐 Secret URL -> show real homepage
+  // 🔐 Secret entry URL
   if (pathname === "/Hunter0207") {
-    return NextResponse.rewrite(new URL("/", request.url));
+    const response = NextResponse.redirect(new URL("/", request.url));
+    response.cookies.set("pa_access", "granted", {
+      httpOnly: false,
+      path: "/",
+    });
+    return response;
   }
 
-  // Everyone else -> coming soon
+  // If cookie exists → allow access everywhere
+  if (hasAccess) {
+    return NextResponse.next();
+  }
+
+  // Everyone else → Coming Soon
   return NextResponse.rewrite(new URL("/coming-soon", request.url));
 }
 
