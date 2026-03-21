@@ -3,33 +3,36 @@ import type { NextRequest } from "next/server";
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const hasAccess = request.cookies.get("pa_access");
+  const hasAccess = request.cookies.get("pa_access")?.value === "granted";
 
-  // Allow API & static files
+  // Allow API routes
+  if (pathname.startsWith("/api")) {
+    return NextResponse.next();
+  }
+
+  // Allow Next internal assets
   if (
-    pathname.startsWith("/api") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon.ico")
   ) {
     return NextResponse.next();
   }
 
-  // 🔐 Secret entry URL
+  // Secret login URL
   if (pathname === "/Hunter0207") {
     const response = NextResponse.redirect(new URL("/", request.url));
     response.cookies.set("pa_access", "granted", {
-      httpOnly: false,
       path: "/",
     });
     return response;
   }
 
-  // If cookie exists → allow access everywhere
+  // If user has access cookie → allow all pages
   if (hasAccess) {
     return NextResponse.next();
   }
 
-  // Everyone else → Coming Soon
+  // Otherwise show coming soon
   return NextResponse.rewrite(new URL("/coming-soon", request.url));
 }
 
