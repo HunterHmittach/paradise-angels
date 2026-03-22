@@ -1,66 +1,81 @@
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[var(--pa-paper)] text-[var(--pa-black)]">
+    <main className="bg-[#f4f1ea] text-black">
 
-      {/* HERO SECTION */}
-      <section className="h-[90vh] flex flex-col justify-center items-center text-center relative">
-        <h1 className="text-[70px] md:text-[110px] font-bold font-[var(--font-cormorant)] leading-none">
-          PARADISE  
-          <span className="block text-[var(--pa-gold)]">ANGELS</span>
-        </h1>
+      {/* SECTION 1 — Identity */}
+      <section className="min-h-screen flex items-center px-10 md:px-24">
+        <div className="max-w-5xl">
+          <h1 className="font-serif text-[48px] md:text-[90px] leading-[0.95] tracking-tight">
+            PARADISE<br />ANGELS
+          </h1>
 
-        <p className="mt-6 text-xl md:text-2xl max-w-2xl text-black/70">
-          A Creative House of Luxury Fashion, Visual Identity & Angelic Expression.
-        </p>
-
-        {/* GLOW AURA */}
-        <div className="absolute w-[400px] h-[400px] bg-[var(--pa-gold-soft)] opacity-30 blur-[120px] rounded-full -z-10"></div>
+          <p className="mt-8 text-sm tracking-[0.4em] uppercase text-neutral-500">
+            A House Built Under Pressure
+          </p>
+        </div>
       </section>
 
-      {/* MANIFESTO SECTION */}
-      <section className="py-28 px-10 md:px-40 text-center">
-        <h2 className="text-5xl font-semibold font-[var(--font-cormorant)] mb-10 text-[var(--pa-black)]">
-          We Create More Than Fashion.
-        </h2>
-        <p className="text-xl text-black/70 leading-relaxed max-w-3xl mx-auto">
-          Paradise Angels blends luxury with identity, crafting pieces that live 
-          between the physical and the ethereal. Each drop carries vision, emotion 
-          and aesthetic direction shaped by a creative universe.
-        </p>
+
+      {/* SECTION 2 — Statement */}
+      <section className="px-10 md:px-24 py-32 border-t border-neutral-200">
+        <div className="max-w-3xl space-y-8">
+          <p className="text-2xl md:text-3xl font-serif leading-snug">
+            Not formed by comfort.
+          </p>
+          <p className="text-2xl md:text-3xl font-serif leading-snug">
+            Constructed through discipline.
+          </p>
+          <p className="text-2xl md:text-3xl font-serif leading-snug">
+            Released without permission.
+          </p>
+        </div>
       </section>
 
-      {/* VISUAL EDITORIAL GALLERY */}
-      <section className="grid md:grid-cols-3 gap-6 px-10 md:px-40 py-20">
-        <div className="h-[400px] bg-black rounded-[var(--pa-radius)] shadow-[var(--pa-shadow)]"></div>
-        <div className="h-[400px] bg-black rounded-[var(--pa-radius)] shadow-[var(--pa-shadow)]"></div>
-        <div className="h-[400px] bg-black rounded-[var(--pa-radius)] shadow-[var(--pa-shadow)]"></div>
-      </section>
 
-      {/* SHOP PREVIEW */}
-      <section className="py-20 px-10 md:px-40">
-        <h2 className="text-4xl font-[var(--font-cormorant)] mb-10">
-          Featured Pieces
-        </h2>
+      {/* SECTION 3 — The First Form */}
+      <section className="px-10 md:px-24 py-40 border-t border-neutral-200">
+        <div className="max-w-6xl">
 
-        <div className="grid md:grid-cols-3 gap-10">
-          <div className="p-6 bg-white rounded-[var(--pa-radius)] shadow-xl border border-black/10">
-            <div className="h-[300px] bg-black rounded-xl"></div>
-            <h3 className="text-xl mt-4 font-semibold">Product Name</h3>
-            <p className="text-black/70">€120</p>
-          </div>
+          <h2 className="text-sm tracking-[0.5em] uppercase text-neutral-500 mb-16">
+            The First Form
+          </h2>
 
-          <div className="p-6 bg-white rounded-[var(--pa-radius)] shadow-xl border border-black/10">
-            <div className="h-[300px] bg-black rounded-xl"></div>
-            <h3 className="text-xl mt-4 font-semibold">Product Name</h3>
-            <p className="text-black/70">€120</p>
-          </div>
+          <div className="grid md:grid-cols-2 gap-16 items-center">
 
-          <div className="p-6 bg-white rounded-[var(--pa-radius)] shadow-xl border border-black/10">
-            <div className="h-[300px] bg-black rounded-xl"></div>
-            <h3 className="text-xl mt-4 font-semibold">Product Name</h3>
-            <p className="text-black/70">€120</p>
+            {/* Placeholder Visual */}
+            <div className="bg-neutral-200 h-[500px] w-full" />
+
+            {/* Product Info */}
+            <div>
+              <h3 className="font-serif text-4xl mb-6">
+                Form 01
+              </h3>
+
+              <p className="text-neutral-600 mb-10 max-w-md">
+                Constructed under precision.
+                Designed without compromise.
+              </p>
+
+              <p className="text-lg mb-8">
+                €180
+              </p>
+
+              <button className="uppercase tracking-widest text-sm border-b border-black pb-1 hover:opacity-60 transition">
+                Acquire
+              </button>
+
+            </div>
+
           </div>
         </div>
+      </section>
+
+
+      {/* SECTION 4 — Closing */}
+      <section className="px-10 md:px-24 py-40 border-t border-neutral-200">
+        <p className="font-serif text-4xl">
+          The ascent continues.
+        </p>
       </section>
 
     </main>
