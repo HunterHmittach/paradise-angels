@@ -1,74 +1,215 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import supabase from "@/lib/supabase";
-import { useCart } from "@/app/(site)/components/cart/CartContext";
 
-
-interface Product {
+/* =========================
+   PRODUCT TYPE
+========================= */
+type Product = {
   id: number;
   name: string;
+  category: "Apparel" | "Perfumes";
   price: number;
-  description: string;
-  image_url: string;
-}
+  image: string;
+  hoverImage: string;
+  popular: boolean;
+  isNew: boolean;
+};
 
-export default function ShopPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const { addToCart } = useCart();
+/* =========================
+   PRODUCTS DATA
+========================= */
+const products: Product[] = [
+  {
+    id: 1,
+    name: "Black Hoodie",
+    category: "Apparel",
+    price: 89.99,
+    image: "/black-hoodie.png",
+    hoverImage: "/black-hoodie.png", // tijdelijk zelfde image
+    popular: true,
+    isNew: true,
+  },
+  {
+    id: 2,
+    name: "Black T-Shirt",
+    category: "Apparel",
+    price: 20,
+    image: "/black-tshirt.png",
+    hoverImage: "/black-tshirt.png",
+    popular: false,
+    isNew: true,
+  },
+];
 
-  useEffect(() => {
-    async function loadProducts() {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*");
+export default function Shop() {
+  const [filter, setFilter] = useState<"All" | "Apparel" | "Perfumes">("All");
+  const [sort, setSort] = useState<"New" | "Price" | "Popular">("New");
+  const [quickView, setQuickView] = useState<Product | null>(null);
 
-      if (error) {
-        console.error(error);
-      } else {
-        setProducts(data as Product[]);
-      }
-    }
+  /* =========================
+     FILTER
+  ========================= */
+  let filteredProducts = [...products];
 
-    loadProducts();
-  }, []);
+  if (filter !== "All") {
+    filteredProducts = filteredProducts.filter(
+      (p) => p.category === filter
+    );
+  }
+
+  /* =========================
+     SORT
+  ========================= */
+  if (sort === "Price") {
+    filteredProducts.sort((a, b) => a.price - b.price);
+  }
+
+  if (sort === "Popular") {
+    filteredProducts.sort((a, b) =>
+      b.popular === a.popular ? 0 : b.popular ? 1 : -1
+    );
+  }
+
+  if (sort === "New") {
+    filteredProducts.sort((a, b) =>
+      b.isNew === a.isNew ? 0 : b.isNew ? 1 : -1
+    );
+  }
 
   return (
-  <main className="py-32">
-    <h1 className="text-6xl font-bold mb-16">
-      <span className="text-white">SHOP</span>{" "}
-      <span className="text-yellow-400">PARADISE</span>
-    </h1>
+    <main className="bg-[#f4f3ef] text-black min-h-screen">
 
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-      {products.length === 0 && <p>No products found.</p>}
+      {/* ================= HEADER ================= */}
+      <section className="px-10 md:px-24 pt-28 pb-10 border-b border-black/10">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:justify-between gap-8">
 
-      {products.map((p) => (
-        <Link href={`/shop/${p.id}`} key={p.id}>
-          <div className="bg-black border border-gray-700 rounded-xl overflow-hidden hover:scale-105 transition cursor-pointer">
-            <img src={p.image_url} className="w-full h-64 object-cover" />
+          <h1 className="font-serif text-5xl tracking-[0.25em] uppercase">
+            Shop
+          </h1>
 
-            <div className="p-6">
-              <h2 className="text-2xl font-bold mb-2">{p.name}</h2>
-              <p className="opacity-75 text-sm">{p.description}</p>
-              <p className="text-yellow-400 mt-2 font-semibold">€{p.price}</p>
+          <div className="flex gap-8 text-sm tracking-widest uppercase">
+
+            {["All", "Apparel", "Perfumes"].map((cat) => (
+              <button
+                key={cat}
+                onClick={() =>
+                  setFilter(cat as "All" | "Apparel" | "Perfumes")
+                }
+                className={`transition ${
+                  filter === cat ? "text-black" : "text-black/40"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+
+            <div className="border-l border-black/20 pl-8">
+              <select
+                value={sort}
+                onChange={(e) =>
+                  setSort(e.target.value as "New" | "Price" | "Popular")
+                }
+                className="bg-transparent outline-none text-black/60"
+              >
+                <option value="New">New</option>
+                <option value="Price">Price</option>
+                <option value="Popular">Popular</option>
+              </select>
             </div>
-            <button
-             onClick={(e) => {
-             e.preventDefault(); // voorkomt navigatie naar product page
-             addToCart(p);
-             }}
-             className="mt-3 w-full bg-yellow-500 text-black py-2 rounded hover:bg-yellow-600 transition"
-            >
-             Add to Cart
-            </button>
 
           </div>
-        </Link>
-      ))}
-    </div>
-  </main>
-);
+        </div>
+      </section>
 
+      {/* ================= GRID ================= */}
+      <section className="px-10 md:px-24 py-20">
+        <div className="max-w-7xl mx-auto grid sm:grid-cols-2 lg:grid-cols-3 gap-16">
+
+          {filteredProducts.map((product) => (
+            <div key={product.id} className="group relative">
+
+              {/* IMAGE SWAP */}
+              <div
+                onClick={() => setQuickView(product)}
+                className="relative overflow-hidden bg-[#e9e7df] cursor-pointer"
+              >
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-[480px] object-cover transition duration-700 group-hover:opacity-0"
+                />
+                <img
+                  src={product.hoverImage}
+                  alt=""
+                  className="absolute inset-0 w-full h-[480px] object-cover opacity-0 transition duration-700 group-hover:opacity-100"
+                />
+              </div>
+
+              {/* INFO */}
+              <div className="mt-6 flex justify-between items-start">
+
+                <Link href={`/shop/${product.id}`}>
+                  <h2 className="font-serif text-base tracking-[0.2em] uppercase hover:underline">
+                    {product.name}
+                  </h2>
+                </Link>
+
+                <p className="text-sm tracking-widest">
+                  €{product.price.toFixed(2)}
+                </p>
+
+              </div>
+
+            </div>
+          ))}
+
+        </div>
+      </section>
+
+      {/* ================= QUICK VIEW ================= */}
+      {quickView && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+
+          <div className="bg-white w-[90%] md:w-[600px] p-10 relative">
+
+            <button
+              onClick={() => setQuickView(null)}
+              className="absolute top-4 right-4 text-black/60"
+            >
+              ✕
+            </button>
+
+            <img
+              src={quickView.image}
+              alt={quickView.name}
+              className="w-full h-[350px] object-cover mb-6"
+            />
+
+            <h2 className="font-serif text-2xl tracking-widest uppercase">
+              {quickView.name}
+            </h2>
+
+            <p className="mt-4 text-black/60">
+              Luxury construction. Precision tailoring.
+            </p>
+
+            <p className="mt-6 tracking-widest">
+              €{quickView.price.toFixed(2)}
+            </p>
+
+            <Link href={`/shop/${quickView.id}`}>
+              <button className="mt-6 px-8 py-3 border border-black hover:bg-black hover:text-white transition">
+                View Product
+              </button>
+            </Link>
+
+          </div>
+
+        </div>
+      )}
+
+    </main>
+  );
 }

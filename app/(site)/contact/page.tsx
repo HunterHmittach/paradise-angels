@@ -1,108 +1,143 @@
 "use client";
 
-import { useState } from "react";
+import { motion } from "framer-motion";
 
-export default function ContactPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setStatus("sending");
-
-    const res = await fetch("/api/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, message }),
-    });
-
-    const json = await res.json();
-
-    if (json.success) {
-      setStatus("success");
-      setName("");
-      setEmail("");
-      setMessage("");
-    } else {
-      setStatus("error");
-    }
-  }
-
+export default function Contact() {
   return (
-    <main className="min-h-screen bg-black text-white px-6 py-20 flex flex-col items-center">
-      <h1 className="text-5xl font-bold text-yellow-300 mb-4 tracking-wide">
-        Contact Paradise Angels
-      </h1>
+    <main className="relative bg-[#f4f3ef] text-black overflow-hidden grain">
 
-      <p className="text-gray-300 text-lg max-w-2xl text-center mb-12">
-        Have a question? Collaboration request? Or business inquiry?
-        Send us a message — we’ll respond within 24 hours.
-      </p>
+      {/* ===== FLOATING LIGHT ===== */}
+      <motion.div
+        animate={{
+          x: [0, 80, 0],
+          y: [0, 60, 0],
+        }}
+        transition={{
+          duration: 18,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="absolute top-[-200px] right-[-200px] w-[600px] h-[600px] bg-gradient-to-r from-amber-200 via-amber-100 to-transparent rounded-full blur-[180px] opacity-40"
+      />
 
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-xl bg-zinc-900 p-8 rounded-xl border border-zinc-700 shadow-xl space-y-6"
-      >
-        {/* NAME */}
-        <div>
-          <label className="block text-sm text-gray-300 mb-1">Your Name</label>
-          <input
-            type="text"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full p-3 rounded-md bg-black border border-zinc-700 text-white focus:border-yellow-300 outline-none"
-          />
-        </div>
-
-        {/* EMAIL */}
-        <div>
-          <label className="block text-sm text-gray-300 mb-1">Your Email</label>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 rounded-md bg-black border border-zinc-700 text-white focus:border-yellow-300 outline-none"
-          />
-        </div>
-
-        {/* MESSAGE */}
-        <div>
-          <label className="block text-sm text-gray-300 mb-1">Message</label>
-          <textarea
-            required
-            rows={5}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            className="w-full p-3 rounded-md bg-black border border-zinc-700 text-white focus:border-yellow-300 outline-none resize-none"
-          />
-        </div>
-
-        {/* BUTTON */}
-        <button
-          type="submit"
-          disabled={status === "sending"}
-          className="w-full py-3 text-black font-semibold bg-yellow-300 rounded-full hover:bg-yellow-400 transition disabled:opacity-50"
+      {/* ===== HERO ===== */}
+      <section className="relative z-10 min-h-[70vh] flex items-center px-10 md:px-24">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.2 }}
+          className="max-w-5xl"
         >
-          {status === "sending" ? "Sending..." : "Send Message"}
-        </button>
+          <h1 className="font-serif text-6xl md:text-8xl tracking-[0.25em] uppercase leading-tight">
+            Get in Touch
+          </h1>
 
-        {/* STATUS MESSAGES */}
-        {status === "success" && (
-          <p className="text-green-400 text-center font-medium">
-            ✓ Message sent successfully!
+          <p className="mt-12 text-xl text-black/60 max-w-2xl leading-relaxed">
+            For collaborations, private appointments or creative partnerships,
+            connect with the Paradise Angels house.
           </p>
-        )}
+        </motion.div>
+      </section>
 
-        {status === "error" && (
-          <p className="text-red-400 text-center font-medium">
-            ✗ Something went wrong. Try again later.
-          </p>
-        )}
-      </form>
+      {/* ===== CONTACT SECTION ===== */}
+      <section className="relative z-10 py-40 px-10 md:px-24 border-t border-black/10">
+
+        <div className="absolute left-1/2 top-0 h-full w-[1px] bg-black/10 -translate-x-1/2 hidden md:block" />
+
+        <div className="grid md:grid-cols-2 gap-24 max-w-6xl mx-auto">
+
+          {/* LEFT */}
+          <div>
+            <h2 className="font-serif text-4xl tracking-[0.2em] uppercase mb-16">
+              Direct Contact
+            </h2>
+
+            <div className="space-y-10 text-lg text-black/70">
+              <div>
+                <p className="uppercase tracking-[0.2em] text-sm mb-3">Email</p>
+                <p>contact@paradiseangels.com</p>
+              </div>
+
+              <div>
+                <p className="uppercase tracking-[0.2em] text-sm mb-3">Location</p>
+                <p>Amsterdam, The Netherlands</p>
+              </div>
+
+              <div>
+                <p className="uppercase tracking-[0.2em] text-sm mb-3">Studio</p>
+                <p>Private by appointment only</p>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT FORM */}
+          <form className="space-y-14">
+
+            <div>
+              <label className="block text-sm tracking-[0.2em] uppercase mb-4">
+                Name
+              </label>
+              <input
+                type="text"
+                className="w-full border-b border-black/30 bg-transparent py-4 outline-none focus:border-black transition-all duration-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm tracking-[0.2em] uppercase mb-4">
+                Email
+              </label>
+              <input
+                type="email"
+                className="w-full border-b border-black/30 bg-transparent py-4 outline-none focus:border-black transition-all duration-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm tracking-[0.2em] uppercase mb-4">
+                Message
+              </label>
+              <textarea
+                rows={4}
+                className="w-full border-b border-black/30 bg-transparent py-4 outline-none focus:border-black transition-all duration-500 resize-none"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="relative mt-10 uppercase tracking-[0.25em] text-sm border border-black px-12 py-5 overflow-hidden group"
+            >
+              <span className="relative z-10 transition-colors duration-500 group-hover:text-white">
+                Send Message
+              </span>
+              <span className="absolute inset-0 bg-black scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100" />
+            </button>
+
+          </form>
+
+        </div>
+      </section>
+
+      {/* ===== SOCIAL ===== */}
+      <section className="relative z-10 py-40 px-10 md:px-24 border-t border-black/10 text-center">
+        <h3 className="font-serif text-4xl tracking-[0.2em] uppercase mb-20">
+          Follow Us
+        </h3>
+
+        <div className="flex justify-center gap-20 text-lg tracking-[0.25em] uppercase">
+          <a href="#" className="hover:opacity-60 transition">Instagram</a>
+          <a href="#" className="hover:opacity-60 transition">TikTok</a>
+          <a href="#" className="hover:opacity-60 transition">Pinterest</a>
+        </div>
+      </section>
+
+      {/* ===== FOOTER STATEMENT ===== */}
+      <section className="relative z-10 py-28 text-center">
+        <h4 className="font-serif text-2xl tracking-[0.2em] uppercase text-black/70">
+          Amsterdam Based — Worldwide Vision
+        </h4>
+      </section>
+
     </main>
   );
 }

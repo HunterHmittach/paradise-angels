@@ -25,3 +25,18 @@ body {
     --pa-white: #ffffff;
     --pa-paper: #f5f5f2;
 }
+
+/* ===== Subtle Film Grain ===== */
+.grain {
+  position: relative;
+}
+
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("https://www.transparenttextures.com/patterns/asfalt-light.png");
+  opacity: 0.04;
+  pointer-events: none;
+  z-index: 1;
+}
