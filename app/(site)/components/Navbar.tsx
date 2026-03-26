@@ -10,104 +10,66 @@ export default function Navbar() {
   const { scrollY, scrollYProgress } = useScroll();
   const [scrolled, setScrolled] = useState(false);
 
-  /* Detect scroll */
   useEffect(() => {
     return scrollY.on("change", (latest) => {
       setScrolled(latest > 120);
     });
   }, [scrollY]);
 
-  /* Background transition */
   const background = useTransform(
     scrollY,
     [0, 200],
-    ["rgba(255,255,255,0)", "rgba(244,241,234,0.92)"]
+    ["rgba(0,0,0,0)", "rgba(244,241,234,0.85)"]
   );
 
-  /* Proper blur as string */
-  const backdropBlur = useTransform(
-    scrollY,
-    [0, 200],
-    ["blur(0px)", "blur(20px)"]
-  );
+  const blur = useTransform(scrollY, [0, 200], [0, 20]);
 
-  /* Always dark text (no white glitch) */
   const textColor = useTransform(
     scrollY,
     [0, 200],
-    ["#111111", "#000000"]
+    ["#000000", "#000000"]
   );
 
-  /* Elegant scale shrink */
-  const scale = useTransform(scrollY, [0, 200], [1, 0.9]);
-
-  /* Subtle opacity shift */
-  const opacity = useTransform(scrollY, [0, 200], [1, 0.85]);
+  const scale = useTransform(scrollY, [0, 200], [1, 0.85]);
 
   return (
     <>
-      {/* Scroll Progress Line */}
+      {/* Scroll progress line */}
       <motion.div
         style={{ scaleX: scrollYProgress }}
         className="fixed top-0 left-0 right-0 h-[2px] bg-neutral-400 origin-left z-[60]"
       />
 
       <motion.nav
-        style={{ background, backdropFilter: backdropBlur }}
+        style={{
+          background,
+          backdropFilter: blur.get() ? `blur(${blur.get()}px)` : undefined,
+        }}
         className="fixed top-0 left-0 w-full z-50 transition-all duration-700"
       >
         <motion.div
-          style={{ color: textColor, scale, opacity }}
+          style={{ color: textColor, scale }}
           className="flex items-center justify-between px-12 md:px-24 py-8 transition-all duration-700"
         >
-          {/* Left Logo */}
-          <div className="flex items-center gap-4">
-            <LogoMark />
-          </div>
+          {/* Logo */}
+          <LogoMark />
 
-          {/* Center Menu (only hero state) */}
+          {/* Full menu only in hero */}
           {!scrolled && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ duration: 1.2 }}
-              className="flex gap-16 text-xs tracking-[0.45em] uppercase"
+              className="flex gap-16 text-xs tracking-[0.4em] uppercase"
             >
-              <Link
-                href="/"
-                className="relative group transition-all duration-500"
-              >
-                Home
-                <span className="absolute left-0 -bottom-1 w-0 h-[1px] bg-black transition-all duration-500 group-hover:w-full" />
-              </Link>
-
-              <Link
-                href="/about"
-                className="relative group transition-all duration-500"
-              >
-                About
-                <span className="absolute left-0 -bottom-1 w-0 h-[1px] bg-black transition-all duration-500 group-hover:w-full" />
-              </Link>
-
-              <Link
-                href="/shop"
-                className="relative group transition-all duration-500"
-              >
-                Shop
-                <span className="absolute left-0 -bottom-1 w-0 h-[1px] bg-black transition-all duration-500 group-hover:w-full" />
-              </Link>
-
-              <Link
-                href="/contact"
-                className="relative group transition-all duration-500"
-              >
-                Contact
-                <span className="absolute left-0 -bottom-1 w-0 h-[1px] bg-black transition-all duration-500 group-hover:w-full" />
-              </Link>
+              <Link href="/">Home</Link>
+              <Link href="/about">About</Link>
+              <Link href="/shop">Shop</Link>
+              <Link href="/contact">Contact</Link>
             </motion.div>
           )}
 
-          {/* Cart Icon */}
+          {/* Cart always visible */}
           <Link
             href="/cart"
             className="relative group flex items-center justify-center"
