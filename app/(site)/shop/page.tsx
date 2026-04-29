@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 /* =========================
    PRODUCT TYPE
@@ -27,7 +28,7 @@ const products: Product[] = [
     category: "Apparel",
     price: 89.99,
     image: "/black-hoodie.png",
-    hoverImage: "/black-hoodie.png", // tijdelijk zelfde image
+    hoverImage: "/black-hoodie.png",
     popular: true,
     isNew: true,
   },
@@ -48,9 +49,7 @@ export default function Shop() {
   const [sort, setSort] = useState<"New" | "Price" | "Popular">("New");
   const [quickView, setQuickView] = useState<Product | null>(null);
 
-  /* =========================
-     FILTER
-  ========================= */
+  /* FILTER */
   let filteredProducts = [...products];
 
   if (filter !== "All") {
@@ -59,9 +58,7 @@ export default function Shop() {
     );
   }
 
-  /* =========================
-     SORT
-  ========================= */
+  /* SORT */
   if (sort === "Price") {
     filteredProducts.sort((a, b) => a.price - b.price);
   }
@@ -127,8 +124,14 @@ export default function Shop() {
       <section className="px-10 md:px-24 py-20">
         <div className="max-w-7xl mx-auto grid sm:grid-cols-2 lg:grid-cols-3 gap-16">
 
-          {filteredProducts.map((product) => (
-            <div key={product.id} className="group relative">
+          {filteredProducts.map((product, index) => (
+            <motion.div
+              key={product.id}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              className="group relative"
+            >
 
               {/* IMAGE SWAP */}
               <div
@@ -138,12 +141,12 @@ export default function Shop() {
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="w-full h-[480px] object-cover transition duration-700 group-hover:opacity-0"
+                  className="w-full h-[480px] object-cover transition duration-700 group-hover:opacity-0 group-hover:scale-105"
                 />
                 <img
                   src={product.hoverImage}
                   alt=""
-                  className="absolute inset-0 w-full h-[480px] object-cover opacity-0 transition duration-700 group-hover:opacity-100"
+                  className="absolute inset-0 w-full h-[480px] object-cover opacity-0 transition duration-700 group-hover:opacity-100 group-hover:scale-105"
                 />
               </div>
 
@@ -162,10 +165,17 @@ export default function Shop() {
 
               </div>
 
-            </div>
+            </motion.div>
           ))}
 
         </div>
+      </section>
+
+      {/* ================= PAGINATION ================= */}
+      <section className="pb-20 flex justify-center gap-6 text-sm tracking-widest uppercase">
+        <button className="opacity-40">01</button>
+        <button className="hover:underline">02</button>
+        <button className="hover:underline">03</button>
       </section>
 
       {/* ================= QUICK VIEW ================= */}
