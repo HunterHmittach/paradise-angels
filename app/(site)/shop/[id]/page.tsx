@@ -1,5 +1,6 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -12,9 +13,7 @@ type Product = {
   category: "Apparel" | "Perfumes";
   price: number;
   image: string;
-  hoverImage: string;
-  popular: boolean;
-  isNew: boolean;
+  description: string;
 };
 
 /* =========================
@@ -27,9 +26,8 @@ const products: Product[] = [
     category: "Apparel",
     price: 89.99,
     image: "/black-hoodie.png",
-    hoverImage: "/black-hoodie.png",
-    popular: true,
-    isNew: true,
+    description:
+      "Crafted from premium heavyweight cotton. Structured silhouette. Minimalist luxury design.",
   },
   {
     id: 2,
@@ -37,133 +35,96 @@ const products: Product[] = [
     category: "Apparel",
     price: 20,
     image: "/black-tshirt.png",
-    hoverImage: "/black-tshirt.png",
-    popular: false,
-    isNew: true,
+    description:
+      "Essential everyday piece. Precision cut. Refined construction with elevated finishing.",
   },
 ];
 
-export default function Shop() {
-  const [filter, setFilter] = useState<"All" | "Apparel" | "Perfumes">("All");
-  const [sort, setSort] = useState<"New" | "Price" | "Popular">("New");
+export default function ProductPage() {
+  const params = useParams();
+  const productId = Number(params.id);
+  const product = products.find((p) => p.id === productId);
 
-  /* =========================
-     FILTER
-  ========================= */
-  let filteredProducts = [...products];
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
-  if (filter !== "All") {
-    filteredProducts = filteredProducts.filter(
-      (p) => p.category === filter
-    );
-  }
-
-  /* =========================
-     SORT
-  ========================= */
-  if (sort === "Price") {
-    filteredProducts.sort((a, b) => a.price - b.price);
-  }
-
-  if (sort === "Popular") {
-    filteredProducts.sort((a, b) =>
-      b.popular === a.popular ? 0 : b.popular ? 1 : -1
-    );
-  }
-
-  if (sort === "New") {
-    filteredProducts.sort((a, b) =>
-      b.isNew === a.isNew ? 0 : b.isNew ? 1 : -1
+  if (!product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Product not found
+      </div>
     );
   }
 
   return (
-    <main className="bg-[#f4f3ef] text-black min-h-screen">
+    <main className="bg-[#f4f3ef] text-black min-h-screen px-10 md:px-24 pt-40 pb-24">
+      <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-20">
 
-      {/* ================= HEADER ================= */}
-      <section className="px-10 md:px-24 pt-28 pb-10 border-b border-black/10">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:justify-between gap-8">
+        {/* ================= IMAGE ================= */}
+        <div className="bg-[#e9e7df]">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-[650px] object-cover"
+          />
+        </div>
 
-          <h1 className="font-serif text-5xl tracking-[0.25em] uppercase">
-            Shop
+        {/* ================= INFO ================= */}
+        <div className="flex flex-col justify-start">
+
+          <h1 className="font-serif text-4xl tracking-[0.25em] uppercase">
+            {product.name}
           </h1>
 
-          <div className="flex gap-8 text-sm tracking-widest uppercase">
+          <p className="mt-6 text-black/60 leading-relaxed max-w-md">
+            {product.description}
+          </p>
 
-            {["All", "Apparel", "Perfumes"].map((cat) => (
-              <button
-                key={cat}
-                onClick={() =>
-                  setFilter(cat as "All" | "Apparel" | "Perfumes")
-                }
-                className={`transition ${
-                  filter === cat ? "text-black" : "text-black/40"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          <p className="mt-10 text-xl tracking-widest">
+            €{product.price.toFixed(2)}
+          </p>
 
-            <div className="border-l border-black/20 pl-8">
-              <select
-                value={sort}
-                onChange={(e) =>
-                  setSort(e.target.value as "New" | "Price" | "Popular")
-                }
-                className="bg-transparent outline-none text-black/60"
-              >
-                <option value="New">New</option>
-                <option value="Price">Price</option>
-                <option value="Popular">Popular</option>
-              </select>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* ================= GRID ================= */}
-      <section className="px-10 md:px-24 py-20">
-        <div className="max-w-7xl mx-auto grid sm:grid-cols-2 lg:grid-cols-3 gap-16">
-
-          {filteredProducts.map((product) => (
-            <Link key={product.id} href={`/shop/${product.id}`}>
-              <div className="group relative cursor-pointer">
-
-                {/* IMAGE SWAP */}
-                <div className="relative overflow-hidden bg-[#e9e7df]">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-[480px] object-cover transition duration-700 group-hover:opacity-0"
-                  />
-                  <img
-                    src={product.hoverImage}
-                    alt=""
-                    className="absolute inset-0 w-full h-[480px] object-cover opacity-0 transition duration-700 group-hover:opacity-100"
-                  />
-                </div>
-
-                {/* INFO */}
-                <div className="mt-6 flex justify-between items-start">
-
-                  <h2 className="font-serif text-base tracking-[0.2em] uppercase hover:underline">
-                    {product.name}
-                  </h2>
-
-                  <p className="text-sm tracking-widest">
-                    €{product.price.toFixed(2)}
-                  </p>
-
-                </div>
-
+          {/* ================= SIZE SELECTOR ================= */}
+          {product.category === "Apparel" && (
+            <div className="mt-10">
+              <p className="text-sm tracking-widest uppercase mb-4">
+                Size
+              </p>
+              <div className="flex gap-4">
+                {["S", "M", "L", "XL"].map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`px-6 py-3 border transition ${
+                      selectedSize === size
+                        ? "border-black bg-black text-white"
+                        : "border-black/30"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
               </div>
-            </Link>
-          ))}
+            </div>
+          )}
+
+          {/* ================= ADD TO CART ================= */}
+          <button
+            className="mt-14 px-10 py-4 border border-black hover:bg-black hover:text-white transition tracking-widest uppercase"
+          >
+            Add to Cart
+          </button>
+
+          {/* ================= BACK ================= */}
+          <Link
+            href="/shop"
+            className="mt-10 text-sm tracking-widest uppercase text-black/40 hover:text-black"
+          >
+            ← Back to Shop
+          </Link>
 
         </div>
-      </section>
 
+      </div>
     </main>
   );
 }

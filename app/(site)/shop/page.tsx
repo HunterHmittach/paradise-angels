@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 
 /* =========================
    PRODUCT TYPE
@@ -47,9 +46,10 @@ const products: Product[] = [
 export default function Shop() {
   const [filter, setFilter] = useState<"All" | "Apparel" | "Perfumes">("All");
   const [sort, setSort] = useState<"New" | "Price" | "Popular">("New");
-  const [quickView, setQuickView] = useState<Product | null>(null);
 
-  /* FILTER */
+  /* =========================
+     FILTER
+  ========================= */
   let filteredProducts = [...products];
 
   if (filter !== "All") {
@@ -58,7 +58,9 @@ export default function Shop() {
     );
   }
 
-  /* SORT */
+  /* =========================
+     SORT
+  ========================= */
   if (sort === "Price") {
     filteredProducts.sort((a, b) => a.price - b.price);
   }
@@ -124,101 +126,43 @@ export default function Shop() {
       <section className="px-10 md:px-24 py-20">
         <div className="max-w-7xl mx-auto grid sm:grid-cols-2 lg:grid-cols-3 gap-16">
 
-          {filteredProducts.map((product, index) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="group relative"
-            >
+          {filteredProducts.map((product) => (
+            <Link key={product.id} href={`/shop/${product.id}`}>
+              <div className="group relative cursor-pointer">
 
-              {/* IMAGE SWAP */}
-              <div
-                onClick={() => setQuickView(product)}
-                className="relative overflow-hidden bg-[#e9e7df] cursor-pointer"
-              >
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-[480px] object-cover transition duration-700 group-hover:opacity-0 group-hover:scale-105"
-                />
-                <img
-                  src={product.hoverImage}
-                  alt=""
-                  className="absolute inset-0 w-full h-[480px] object-cover opacity-0 transition duration-700 group-hover:opacity-100 group-hover:scale-105"
-                />
-              </div>
+                {/* IMAGE SWAP */}
+                <div className="relative overflow-hidden bg-[#e9e7df]">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-[480px] object-cover transition duration-700 group-hover:opacity-0"
+                  />
+                  <img
+                    src={product.hoverImage}
+                    alt=""
+                    className="absolute inset-0 w-full h-[480px] object-cover opacity-0 transition duration-700 group-hover:opacity-100"
+                  />
+                </div>
 
-              {/* INFO */}
-              <div className="mt-6 flex justify-between items-start">
+                {/* INFO */}
+                <div className="mt-6 flex justify-between items-start">
 
-                <Link href={`/shop/${product.id}`}>
                   <h2 className="font-serif text-base tracking-[0.2em] uppercase hover:underline">
                     {product.name}
                   </h2>
-                </Link>
 
-                <p className="text-sm tracking-widest">
-                  €{product.price.toFixed(2)}
-                </p>
+                  <p className="text-sm tracking-widest">
+                    €{product.price.toFixed(2)}
+                  </p>
+
+                </div>
 
               </div>
-
-            </motion.div>
+            </Link>
           ))}
 
         </div>
       </section>
-
-      {/* ================= PAGINATION ================= */}
-      <section className="pb-20 flex justify-center gap-6 text-sm tracking-widest uppercase">
-        <button className="opacity-40">01</button>
-        <button className="hover:underline">02</button>
-        <button className="hover:underline">03</button>
-      </section>
-
-      {/* ================= QUICK VIEW ================= */}
-      {quickView && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-
-          <div className="bg-white w-[90%] md:w-[600px] p-10 relative">
-
-            <button
-              onClick={() => setQuickView(null)}
-              className="absolute top-4 right-4 text-black/60"
-            >
-              ✕
-            </button>
-
-            <img
-              src={quickView.image}
-              alt={quickView.name}
-              className="w-full h-[350px] object-cover mb-6"
-            />
-
-            <h2 className="font-serif text-2xl tracking-widest uppercase">
-              {quickView.name}
-            </h2>
-
-            <p className="mt-4 text-black/60">
-              Luxury construction. Precision tailoring.
-            </p>
-
-            <p className="mt-6 tracking-widest">
-              €{quickView.price.toFixed(2)}
-            </p>
-
-            <Link href={`/shop/${quickView.id}`}>
-              <button className="mt-6 px-8 py-3 border border-black hover:bg-black hover:text-white transition">
-                View Product
-              </button>
-            </Link>
-
-          </div>
-
-        </div>
-      )}
 
     </main>
   );
