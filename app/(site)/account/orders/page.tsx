@@ -84,15 +84,16 @@ export default function AccountOrdersPage() {
             </div>
           ) : (
             orders.map((order) => (
-              <div
+              <Link
                 key={order.id}
-                className="grid md:grid-cols-4 gap-6 px-8 py-7 border-b border-black/10"
+                href={`/account/orders/${order.id}`}
+                className="grid md:grid-cols-4 gap-6 px-8 py-7 border-b border-black/10 hover:bg-white transition"
               >
                 <div>
                   <p className="text-xs tracking-[0.3em] uppercase text-black/40">
                     Order
                   </p>
-                  <p className="mt-2 font-serif text-2xl tracking-[0.15em]">
+                  <p className="mt-2 font-serif text-2xl tracking-[0.15em] hover:underline">
                     #{order.id}
                   </p>
                 </div>
@@ -121,7 +122,7 @@ export default function AccountOrdersPage() {
                   </p>
                   <p className="mt-2">€{Number(order.total).toFixed(2)}</p>
                 </div>
-              </div>
+              </Link>
             ))
           )}
         </div>
