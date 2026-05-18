@@ -3,18 +3,51 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, User } from "lucide-react";
 import LogoMark from "./LogoMark";
+
+type CartItem = {
+  quantity: number;
+};
 
 export default function Navbar() {
   const { scrollY, scrollYProgress } = useScroll();
+
   const [scrolled, setScrolled] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
 
   useEffect(() => {
     return scrollY.on("change", (latest) => {
       setScrolled(latest > 120);
     });
   }, [scrollY]);
+
+  useEffect(() => {
+    const updateCartCount = () => {
+      const storedCart = localStorage.getItem("cart");
+
+      const cart: CartItem[] = storedCart
+        ? JSON.parse(storedCart)
+        : [];
+
+      const count = cart.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      );
+
+      setCartCount(count);
+    };
+
+    updateCartCount();
+
+    window.addEventListener("cart-updated", updateCartCount);
+    window.addEventListener("storage", updateCartCount);
+
+    return () => {
+      window.removeEventListener("cart-updated", updateCartCount);
+      window.removeEventListener("storage", updateCartCount);
+    };
+  }, []);
 
   const background = useTransform(
     scrollY,
@@ -34,27 +67,23 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Scroll progress line */}
       <motion.div
         style={{ scaleX: scrollYProgress }}
         className="fixed top-0 left-0 right-0 h-[2px] bg-neutral-400 origin-left z-[60]"
       />
 
       <motion.nav
-        style={{
-          background,
-          backdropFilter: blur.get() ? `blur(${blur.get()}px)` : undefined,
-        }}
+        style={{ background, backdropFilter: blur }}
         className="fixed top-0 left-0 w-full z-50 transition-all duration-700"
       >
         <motion.div
           style={{ color: textColor, scale }}
           className="flex items-center justify-between px-12 md:px-24 py-8 transition-all duration-700"
         >
-          {/* Logo */}
+          {/* LEFT */}
           <LogoMark />
 
-          {/* Full menu only in hero */}
+          {/* CENTER MENU */}
           {!scrolled && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -69,16 +98,42 @@ export default function Navbar() {
             </motion.div>
           )}
 
-          {/* Cart always visible */}
-          <Link
-            href="/cart"
-            className="relative group flex items-center justify-center"
-          >
-            <ShoppingBag
-              size={18}
-              className="transition-all duration-500 group-hover:scale-110"
-            />
-          </Link>
+          {/* RIGHT */}
+          <div className="flex items-center gap-8">
+
+            <Link
+                href="/account"
+              className="group flex items-center gap-2 uppercase tracking-[0.3em] text-[10px]"
+            >
+              <User
+                size={16}
+                className="transition-all duration-500 group-hover:scale-110"
+              />
+
+              {!scrolled && (
+                <span className="hidden md:block">
+                  Account
+                </span>
+              )}
+            </Link>
+
+            <Link
+              href="/cart"
+              className="relative group flex items-center justify-center"
+            >
+              <ShoppingBag
+                size={18}
+                className="transition-all duration-500 group-hover:scale-110"
+              />
+
+              {cartCount > 0 && (
+                <span className="absolute -top-3 -right-3 w-5 h-5 rounded-full bg-black text-white text-[10px] flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+
+          </div>
         </motion.div>
       </motion.nav>
     </>

@@ -7,21 +7,27 @@ export async function POST(req: Request) {
   try {
     const { name, email, message } = await req.json();
 
-    const send = await resend.emails.send({
-      from: "Paradise Angels <no-reply@resend.dev>",
-      to: process.env.CONTACT_TO_EMAIL!,
-      subject: `Nieuw bericht van ${name}`,
+    if (!name || !email || !message) {
+      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    }
+
+    await resend.emails.send({
+      from: "Paradise Angels <onboarding@resend.dev>",
+      to: process.env.CONTACT_TO_EMAIL || "hunterhmittach@gmail.com",
+      subject: `New contact message from ${name}`,
+      replyTo: email,
       html: `
-        <h2>Nieuw contactbericht</h2>
-        <p><strong>Naam:</strong> ${name}</p>
+        <h2>New Contact Message</h2>
+        <p><strong>Name:</strong> ${name}</p>
         <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Bericht:</strong><br>${message}</p>
+        <p><strong>Message:</strong></p>
+        <p>${message}</p>
       `,
     });
 
-    return NextResponse.json({ success: true, send });
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Email error:", error);
-    return NextResponse.json({ success: false, error }, { status: 500 });
+    console.error("Contact email error:", error);
+    return NextResponse.json({ error: "Failed to send message" }, { status: 500 });
   }
 }

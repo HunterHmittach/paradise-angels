@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Heart } from "lucide-react";
+import supabase from "@/lib/supabase";
 
-/* =========================
-   PRODUCT TYPE
-========================= */
 type Product = {
   id: number;
   name: string;
@@ -17,9 +16,6 @@ type Product = {
   isNew: boolean;
 };
 
-/* =========================
-   PRODUCTS DATA
-========================= */
 const products: Product[] = [
   {
     id: 1,
@@ -46,21 +42,64 @@ const products: Product[] = [
 export default function Shop() {
   const [filter, setFilter] = useState<"All" | "Apparel" | "Perfumes">("All");
   const [sort, setSort] = useState<"New" | "Price" | "Popular">("New");
+  const [wishlist, setWishlist] = useState<number[]>([]);
 
-  /* =========================
-     FILTER
-  ========================= */
+  useEffect(() => {
+    async function loadWishlist() {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session?.user) return;
+
+      const userId = sessionData.session.user.id;
+
+      const { data } = await supabase
+        .from("wishlists")
+        .select("product_id")
+        .eq("user_id", userId);
+
+      if (data) setWishlist(data.map((item) => item.product_id));
+    }
+
+    loadWishlist();
+  }, []);
+
+  const toggleWishlist = async (product: Product) => {
+    const { data: sessionData } = await supabase.auth.getSession();
+
+    if (!sessionData.session?.user) {
+      window.location.href = "/login";
+      return;
+    }
+
+    const user = sessionData.session.user;
+
+    if (wishlist.includes(product.id)) {
+      await supabase
+        .from("wishlists")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("product_id", product.id);
+
+      setWishlist((prev) => prev.filter((id) => id !== product.id));
+    } else {
+      await supabase.from("wishlists").insert({
+        user_id: user.id,
+        customer_email: user.email,
+        product_id: product.id,
+        product_name: product.name,
+        product_image: product.image,
+        price: product.price,
+      });
+
+      setWishlist((prev) => [...prev, product.id]);
+    }
+  };
+
   let filteredProducts = [...products];
 
   if (filter !== "All") {
-    filteredProducts = filteredProducts.filter(
-      (p) => p.category === filter
-    );
+    filteredProducts = filteredProducts.filter((p) => p.category === filter);
   }
 
-  /* =========================
-     SORT
-  ========================= */
   if (sort === "Price") {
     filteredProducts.sort((a, b) => a.price - b.price);
   }
@@ -79,23 +118,17 @@ export default function Shop() {
 
   return (
     <main className="bg-[#f4f3ef] text-black min-h-screen">
-
-      {/* ================= HEADER ================= */}
       <section className="px-10 md:px-24 pt-28 pb-10 border-b border-black/10">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:justify-between gap-8">
-
           <h1 className="font-serif text-5xl tracking-[0.25em] uppercase">
             Shop
           </h1>
 
           <div className="flex gap-8 text-sm tracking-widest uppercase">
-
             {["All", "Apparel", "Perfumes"].map((cat) => (
               <button
                 key={cat}
-                onClick={() =>
-                  setFilter(cat as "All" | "Apparel" | "Perfumes")
-                }
+                onClick={() => setFilter(cat as "All" | "Apparel" | "Perfumes")}
                 className={`transition ${
                   filter === cat ? "text-black" : "text-black/40"
                 }`}
@@ -117,53 +150,66 @@ export default function Shop() {
                 <option value="Popular">Popular</option>
               </select>
             </div>
-
           </div>
         </div>
       </section>
 
-      {/* ================= GRID ================= */}
       <section className="px-10 md:px-24 py-20">
         <div className="max-w-7xl mx-auto grid sm:grid-cols-2 lg:grid-cols-3 gap-16">
+          {filteredProducts.map((product) => {
+            const isSaved = wishlist.includes(product.id);
 
-          {filteredProducts.map((product) => (
-            <Link key={product.id} href={`/shop/${product.id}`}>
-              <div className="group relative cursor-pointer">
-
-                {/* IMAGE SWAP */}
-                <div className="relative overflow-hidden bg-[#e9e7df]">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-[480px] object-cover transition duration-700 group-hover:opacity-0"
+            return (
+              <div key={product.id} className="group relative">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleWishlist(product);
+                  }}
+                  className="absolute top-5 right-5 z-20 h-10 w-10 rounded-full bg-[#f4f3ef]/80 backdrop-blur-md flex items-center justify-center border border-black/10 hover:bg-white transition"
+                >
+                  <Heart
+                    size={17}
+                    className={`transition ${
+                      isSaved ? "fill-black text-black" : "text-black"
+                    }`}
                   />
-                  <img
-                    src={product.hoverImage}
-                    alt=""
-                    className="absolute inset-0 w-full h-[480px] object-cover opacity-0 transition duration-700 group-hover:opacity-100"
-                  />
-                </div>
+                </button>
 
-                {/* INFO */}
-                <div className="mt-6 flex justify-between items-start">
+                <Link href={`/shop/${product.id}`}>
+                  <div className="cursor-pointer">
+                    <div className="relative overflow-hidden bg-[#e9e7df]">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-[480px] object-cover transition duration-700 group-hover:opacity-0"
+                      />
 
-                  <h2 className="font-serif text-base tracking-[0.2em] uppercase hover:underline">
-                    {product.name}
-                  </h2>
+                      <img
+                        src={product.hoverImage}
+                        alt=""
+                        className="absolute inset-0 w-full h-[480px] object-cover opacity-0 transition duration-700 group-hover:opacity-100"
+                      />
+                    </div>
 
-                  <p className="text-sm tracking-widest">
-                    €{product.price.toFixed(2)}
-                  </p>
+                    <div className="mt-6 flex justify-between items-start">
+                      <h2 className="font-serif text-base tracking-[0.2em] uppercase hover:underline">
+                        {product.name}
+                      </h2>
 
-                </div>
-
+                      <p className="text-sm tracking-widest">
+                        €{product.price.toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
               </div>
-            </Link>
-          ))}
-
+            );
+          })}
         </div>
       </section>
-
     </main>
   );
 }

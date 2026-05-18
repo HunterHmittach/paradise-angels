@@ -1,27 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import supabase from "@/lib/supabase";
 
+const ADMIN_EMAILS = [
+  "hunterhmittach@gmail.com",
+  "m.hmittach@gmail.com",
+];
+
 export default function AdminPage() {
-  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [allowed, setAllowed] = useState(false);
   const [products, setProducts] = useState<any[]>([]);
 
-  // ----------------------------
-  // 1️⃣ CHECK OF USER ADMIN IS
-  // ----------------------------
   useEffect(() => {
     async function checkAdmin() {
-      const { data, error } = await supabase.auth.getUser();
-
-      if (error) {
-        console.error(error);
-        window.location.href = "/admin/login";
-        return;
-      }
-
+      const { data } = await supabase.auth.getUser();
       const user = data.user;
 
       if (!user) {
@@ -29,13 +24,12 @@ export default function AdminPage() {
         return;
       }
 
-      if (user.app_metadata?.role !== "admin") {
+      if (!ADMIN_EMAILS.includes(user.email || "")) {
         alert("Geen toegang — geen admin.");
         window.location.href = "/";
         return;
       }
 
-      setUser(user);
       setAllowed(true);
       setLoading(false);
     }
@@ -43,9 +37,6 @@ export default function AdminPage() {
     checkAdmin();
   }, []);
 
-  // ----------------------------
-  // 2️⃣ PRODUCTEN LADEN
-  // ----------------------------
   useEffect(() => {
     if (!allowed) return;
 
@@ -53,7 +44,7 @@ export default function AdminPage() {
       const { data, error } = await supabase.from("products").select("*");
 
       if (error) {
-        console.error("Fout bij producten ophalen:", error);
+        console.error(error);
         return;
       }
 
@@ -65,70 +56,122 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <main className="text-center mt-20 text-white">
+      <main className="min-h-screen bg-black text-white flex items-center justify-center">
         Loading admin panel...
       </main>
     );
   }
 
-  if (!allowed) {
-    return (
-      <main className="text-center mt-20 text-white">
-        Geen toegang.
-      </main>
-    );
-  }
-
-  // ----------------------------
-  // 3️⃣ ADMIN DASHBOARD WEERGAVE
-  // ----------------------------
   return (
-    <main className="text-white p-10">
-      <h1 className="text-3xl mb-4">Admin Dashboard</h1>
-      <p className="mb-6">Welkom, admin!</p>
+    <main className="min-h-screen bg-black text-white px-10 md:px-20 py-28">
+      <div className="max-w-7xl mx-auto">
+        <p className="text-xs tracking-[0.4em] uppercase text-white/40">
+          Paradise Angels Admin
+        </p>
 
-      {/* Product sectie */}
-      <h2 className="text-xl font-semibold mb-3">Producten</h2>
+        <h1 className="mt-6 text-4xl md:text-6xl font-serif tracking-[0.18em] uppercase">
+          Dashboard
+        </h1>
 
-      <div className="bg-gray-900 p-5 rounded-xl">
-        {products.length === 0 && <p>Geen producten gevonden…</p>}
-
-        {products.map((p) => (
-          <div
-            key={p.id}
-            className="flex justify-between border-b border-gray-700 py-3"
+        <div className="mt-14 grid md:grid-cols-4 gap-5">
+          <Link
+            href="/admin/orders"
+            className="border border-white/10 bg-white/[0.03] p-8 hover:bg-white/[0.08] transition"
           >
-            <div>
-              <p className="font-semibold">{p.name}</p>
-              <p className="text-gray-400">€{p.price}</p>
-            </div>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/40">
+              Manage
+            </p>
+            <h2 className="mt-4 text-2xl font-serif tracking-[0.15em] uppercase">
+              Orders
+            </h2>
+          </Link>
 
-            <div className="flex gap-3">
-              <a
-                href={`/admin/products/${p.id}`}
-                className="text-yellow-300 hover:text-yellow-200"
-              >
-                Bewerken
-              </a>
+          <Link
+            href="/admin/products"
+            className="border border-white/10 bg-white/[0.03] p-8 hover:bg-white/[0.08] transition"
+          >
+            <p className="text-xs uppercase tracking-[0.3em] text-white/40">
+              Manage
+            </p>
+            <h2 className="mt-4 text-2xl font-serif tracking-[0.15em] uppercase">
+              Products
+            </h2>
+          </Link>
 
-              <a
-                href={`/admin/products/delete/${p.id}`}
-                className="text-red-400 hover:text-red-300"
-              >
-                Verwijderen
-              </a>
-            </div>
+          <Link
+            href="/admin/wishlists"
+            className="border border-white/10 bg-white/[0.03] p-8 hover:bg-white/[0.08] transition"
+          >
+            <p className="text-xs uppercase tracking-[0.3em] text-white/40">
+              Insight
+            </p>
+            <h2 className="mt-4 text-2xl font-serif tracking-[0.15em] uppercase">
+              Wishlists
+            </h2>
+          </Link>
+
+          <Link
+            href="/shop"
+            className="border border-white/10 bg-white/[0.03] p-8 hover:bg-white/[0.08] transition"
+          >
+            <p className="text-xs uppercase tracking-[0.3em] text-white/40">
+              View
+            </p>
+            <h2 className="mt-4 text-2xl font-serif tracking-[0.15em] uppercase">
+              Storefront
+            </h2>
+          </Link>
+        </div>
+
+        <section className="mt-20">
+          <div className="flex items-center justify-between gap-6">
+            <h2 className="text-2xl font-serif tracking-[0.18em] uppercase">
+              Products
+            </h2>
+
+            <Link
+              href="/admin/products/new"
+              className="border border-white px-5 py-3 text-xs uppercase tracking-[0.25em] hover:bg-white hover:text-black transition"
+            >
+              New Product
+            </Link>
           </div>
-        ))}
-      </div>
 
-      {/* Nieuw product knop */}
-      <a
-        href="/admin/products/new"
-        className="block mt-6 bg-white text-black px-4 py-2 rounded-lg w-max hover:bg-gray-200"
-      >
-        Nieuw Product Toevoegen
-      </a>
+          <div className="mt-8 border border-white/10 bg-white/[0.03]">
+            {products.length === 0 && (
+              <p className="p-6 text-white/50">Geen producten gevonden.</p>
+            )}
+
+            {products.map((p) => (
+              <div
+                key={p.id}
+                className="flex justify-between items-center border-b border-white/10 px-6 py-5"
+              >
+                <div>
+                  <p className="font-semibold">{p.name}</p>
+                  <p className="text-white/40">€{p.price}</p>
+                </div>
+
+                <div className="flex gap-5">
+                  <Link
+                    href={`/admin/products/${p.id}`}
+                    className="text-yellow-300"
+                  >
+                    Bewerken
+                  </Link>
+
+                  <Link
+                    href={`/admin/products/delete/${p.id}`}
+                    className="text-red-400"
+                  >
+                    Verwijderen
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
