@@ -8,53 +8,46 @@ import supabase from "@/lib/supabase";
 type Product = {
   id: number;
   name: string;
-  category: "Apparel" | "Perfumes";
+  category?: "Apparel" | "Perfumes" | null;
   price: number;
-  image: string;
-  hoverImage: string;
-  popular: boolean;
-  isNew: boolean;
+  description?: string | null;
+  image_url: string;
+  popular?: boolean | null;
+  is_new?: boolean | null;
 };
 
-const products: Product[] = [
-  {
-    id: 1,
-    name: "Black Hoodie",
-    category: "Apparel",
-    price: 89.99,
-    image: "/black-hoodie.png",
-    hoverImage: "/black-hoodie.png",
-    popular: true,
-    isNew: true,
-  },
-  {
-    id: 2,
-    name: "Black T-Shirt",
-    category: "Apparel",
-    price: 20,
-    image: "/black-tshirt.png",
-    hoverImage: "/black-tshirt.png",
-    popular: false,
-    isNew: true,
-  },
-];
-
 export default function Shop() {
+  const [products, setProducts] = useState<Product[]>([]);
   const [filter, setFilter] = useState<"All" | "Apparel" | "Perfumes">("All");
   const [sort, setSort] = useState<"New" | "Price" | "Popular">("New");
   const [wishlist, setWishlist] = useState<number[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadProducts() {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("id", { ascending: false });
+
+      if (error) console.error(error);
+
+      setProducts(data || []);
+      setLoading(false);
+    }
+
+    loadProducts();
+  }, []);
 
   useEffect(() => {
     async function loadWishlist() {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session?.user) return;
 
-      const userId = sessionData.session.user.id;
-
       const { data } = await supabase
         .from("wishlists")
         .select("product_id")
-        .eq("user_id", userId);
+        .eq("user_id", sessionData.session.user.id);
 
       if (data) setWishlist(data.map((item) => item.product_id));
     }
@@ -80,18 +73,19 @@ export default function Shop() {
         .eq("product_id", product.id);
 
       setWishlist((prev) => prev.filter((id) => id !== product.id));
-    } else {
-      await supabase.from("wishlists").insert({
-        user_id: user.id,
-        customer_email: user.email,
-        product_id: product.id,
-        product_name: product.name,
-        product_image: product.image,
-        price: product.price,
-      });
-
-      setWishlist((prev) => [...prev, product.id]);
+      return;
     }
+
+    await supabase.from("wishlists").insert({
+      user_id: user.id,
+      customer_email: user.email,
+      product_id: product.id,
+      product_name: product.name,
+      product_image: product.image_url,
+      price: product.price,
+    });
+
+    setWishlist((prev) => [...prev, product.id]);
   };
 
   let filteredProducts = [...products];
@@ -101,18 +95,22 @@ export default function Shop() {
   }
 
   if (sort === "Price") {
-    filteredProducts.sort((a, b) => a.price - b.price);
+    filteredProducts.sort((a, b) => Number(a.price) - Number(b.price));
   }
 
   if (sort === "Popular") {
-    filteredProducts.sort((a, b) =>
-      b.popular === a.popular ? 0 : b.popular ? 1 : -1
-    );
+    filteredProducts.sort((a, b) => Number(b.popular) - Number(a.popular));
   }
 
   if (sort === "New") {
-    filteredProducts.sort((a, b) =>
-      b.isNew === a.isNew ? 0 : b.isNew ? 1 : -1
+    filteredProducts.sort((a, b) => Number(b.is_new) - Number(a.is_new));
+  }
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-[#f4f3ef] text-black flex items-center justify-center">
+        Loading shop...
+      </main>
     );
   }
 
@@ -128,7 +126,9 @@ export default function Shop() {
             {["All", "Apparel", "Perfumes"].map((cat) => (
               <button
                 key={cat}
-                onClick={() => setFilter(cat as "All" | "Apparel" | "Perfumes")}
+                onClick={() =>
+                  setFilter(cat as "All" | "Apparel" | "Perfumes")
+                }
                 className={`transition ${
                   filter === cat ? "text-black" : "text-black/40"
                 }`}
@@ -172,9 +172,7 @@ export default function Shop() {
                 >
                   <Heart
                     size={17}
-                    className={`transition ${
-                      isSaved ? "fill-black text-black" : "text-black"
-                    }`}
+                    className={isSaved ? "fill-black text-black" : "text-black"}
                   />
                 </button>
 
@@ -182,15 +180,9 @@ export default function Shop() {
                   <div className="cursor-pointer">
                     <div className="relative overflow-hidden bg-[#e9e7df]">
                       <img
-                        src={product.image}
+                        src={product.image_url}
                         alt={product.name}
-                        className="w-full h-[480px] object-cover transition duration-700 group-hover:opacity-0"
-                      />
-
-                      <img
-                        src={product.hoverImage}
-                        alt=""
-                        className="absolute inset-0 w-full h-[480px] object-cover opacity-0 transition duration-700 group-hover:opacity-100"
+                        className="w-full h-[480px] object-cover transition duration-700 group-hover:scale-105"
                       />
                     </div>
 
@@ -200,7 +192,7 @@ export default function Shop() {
                       </h2>
 
                       <p className="text-sm tracking-widest">
-                        €{product.price.toFixed(2)}
+                        €{Number(product.price).toFixed(2)}
                       </p>
                     </div>
                   </div>

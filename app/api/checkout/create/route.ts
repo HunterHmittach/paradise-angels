@@ -11,13 +11,51 @@ type CartItem = {
   quantity: number;
 };
 
+function getImageUrl(origin: string, image: string) {
+  if (!image) return undefined;
+
+  if (image.startsWith("http://") || image.startsWith("https://")) {
+    return image;
+  }
+
+  return `${origin}${image.startsWith("/") ? image : `/${image}`}`;
+}
+
+async function getOrCreateStripeCustomer(email: string, userId: string) {
+  const existingCustomers = await stripe.customers.list({
+    email,
+    limit: 1,
+  });
+
+  if (existingCustomers.data.length > 0) {
+    return existingCustomers.data[0];
+  }
+
+  return await stripe.customers.create({
+    email,
+    metadata: {
+      user_id: userId,
+    },
+  });
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+
     const cart: CartItem[] = body.cart || [];
+    const customerEmail: string = body.customerEmail || "";
+    const userId: string = body.userId || "";
 
     if (!cart.length) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
+    }
+
+    if (!customerEmail || !userId) {
+      return NextResponse.json(
+        { error: "Customer must be logged in before checkout." },
+        { status: 401 }
+      );
     }
 
     const origin =
@@ -30,10 +68,16 @@ export async function POST(req: Request) {
       0
     );
 
+    const stripeCustomer = await getOrCreateStripeCustomer(
+      customerEmail,
+      userId
+    );
+
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
-        email: "guest@paradiseangels.local",
+        email: customerEmail,
+        user_id: userId,
         total,
         status: "pending",
       })
@@ -66,28 +110,44 @@ export async function POST(req: Request) {
     }
 
     const session = await stripe.checkout.sessions.create({
+      ui_mode: "embedded",
       mode: "payment",
-      payment_method_types: ["card", "ideal"],
 
-      line_items: cart.map((item) => ({
-        price_data: {
-          currency: "eur",
-          product_data: {
-            name: item.size ? `${item.name} - Size ${item.size}` : item.name,
-            images: [`${origin}${item.image}`],
+      customer: stripeCustomer.id,
+
+      line_items: cart.map((item) => {
+        const imageUrl = getImageUrl(origin, item.image);
+
+        return {
+          price_data: {
+            currency: "eur",
+            product_data: {
+              name: item.size ? `${item.name} - Size ${item.size}` : item.name,
+              ...(imageUrl ? { images: [imageUrl] } : {}),
+            },
+            unit_amount: Math.round(Number(item.price) * 100),
           },
-          unit_amount: Math.round(Number(item.price) * 100),
-        },
-        quantity: item.quantity,
-      })),
+          quantity: item.quantity,
+        };
+      }),
 
       metadata: {
         order_id: String(order.id),
+        user_id: userId,
+        customer_email: customerEmail,
       },
 
-      success_url: `${origin}/checkout/success?order=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/checkout`,
+      redirect_on_completion: "if_required",
+
+      return_url: `${origin}/checkout/success?order=${order.id}&session_id={CHECKOUT_SESSION_ID}`,
     });
+
+    if (!session.client_secret) {
+      return NextResponse.json(
+        { error: "Stripe did not return a client secret." },
+        { status: 500 }
+      );
+    }
 
     await supabase
       .from("orders")
@@ -99,13 +159,16 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       order_id: order.id,
-      url: session.url,
+      clientSecret: session.client_secret,
     });
   } catch (error) {
     console.error("Checkout error:", error);
 
     return NextResponse.json(
-      { error: "Stripe checkout failed" },
+      {
+        error: "Stripe checkout failed",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }

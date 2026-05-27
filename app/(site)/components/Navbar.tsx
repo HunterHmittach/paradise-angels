@@ -3,8 +3,14 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ShoppingBag, User } from "lucide-react";
+import { ShoppingBag, User, Shield } from "lucide-react";
 import LogoMark from "./LogoMark";
+import supabase from "@/lib/supabase";
+
+const ADMIN_EMAILS = [
+  "hunterhmittach@gmail.com",
+  "m.hmittach@gmail.com",
+];
 
 type CartItem = {
   quantity: number;
@@ -15,6 +21,7 @@ export default function Navbar() {
 
   const [scrolled, setScrolled] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     return scrollY.on("change", (latest) => {
@@ -23,17 +30,32 @@ export default function Navbar() {
   }, [scrollY]);
 
   useEffect(() => {
+    async function checkAdmin() {
+      const { data } = await supabase.auth.getUser();
+      const email = data.user?.email?.toLowerCase() || "";
+
+      setIsAdmin(ADMIN_EMAILS.includes(email));
+    }
+
+    checkAdmin();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      checkAdmin();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
     const updateCartCount = () => {
       const storedCart = localStorage.getItem("cart");
+      const cart: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
 
-      const cart: CartItem[] = storedCart
-        ? JSON.parse(storedCart)
-        : [];
-
-      const count = cart.reduce(
-        (sum, item) => sum + item.quantity,
-        0
-      );
+      const count = cart.reduce((sum, item) => sum + item.quantity, 0);
 
       setCartCount(count);
     };
@@ -57,11 +79,7 @@ export default function Navbar() {
 
   const blur = useTransform(scrollY, [0, 200], [0, 20]);
 
-  const textColor = useTransform(
-    scrollY,
-    [0, 200],
-    ["#000000", "#000000"]
-  );
+  const textColor = useTransform(scrollY, [0, 200], ["#000000", "#000000"]);
 
   const scale = useTransform(scrollY, [0, 200], [1, 0.85]);
 
@@ -80,10 +98,8 @@ export default function Navbar() {
           style={{ color: textColor, scale }}
           className="flex items-center justify-between px-12 md:px-24 py-8 transition-all duration-700"
         >
-          {/* LEFT */}
           <LogoMark />
 
-          {/* CENTER MENU */}
           {!scrolled && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -98,11 +114,27 @@ export default function Navbar() {
             </motion.div>
           )}
 
-          {/* RIGHT */}
           <div className="flex items-center gap-8">
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="group flex items-center gap-2 uppercase tracking-[0.3em] text-[10px]"
+              >
+                <Shield
+                  size={16}
+                  className="transition-all duration-500 group-hover:scale-110"
+                />
+
+                {!scrolled && (
+                  <span className="hidden md:block">
+                    Admin
+                  </span>
+                )}
+              </Link>
+            )}
 
             <Link
-                href="/account"
+              href="/account"
               className="group flex items-center gap-2 uppercase tracking-[0.3em] text-[10px]"
             >
               <User
@@ -132,7 +164,6 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
-
           </div>
         </motion.div>
       </motion.nav>
