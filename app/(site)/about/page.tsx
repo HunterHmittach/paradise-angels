@@ -1,152 +1,128 @@
 "use client";
 
-import { motion } from "framer-motion";
+import Link from "next/link";
 
-export default function About() {
+export default function AboutPage() {
   return (
-    <main className="bg-[#f4f3ef] text-black">
+    <main className="bg-[#f4f1ea] text-black overflow-hidden">
+      <section className="relative min-h-screen bg-black text-[#f4f1ea] px-8 md:px-20 pt-44 pb-20">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(255,255,255,0.12),transparent_38%)]" />
 
-      {/* ================= HERO ================= */}
-      <section className="min-h-screen flex items-center px-10 md:px-24">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2 }}
-          className="max-w-5xl"
-        >
-          <h1 className="font-serif text-6xl md:text-8xl tracking-[0.25em] uppercase leading-tight">
+        <div className="relative z-10">
+          <p className="text-[10px] uppercase tracking-[0.65em] text-white/35">
             Paradise Angels
+          </p>
+
+          <h1 className="mt-12 font-serif uppercase leading-[0.82] tracking-[0.16em] text-[18vw] md:text-[13vw]">
+            Angels
+            <br />
+            Move
+            <br />
+            Silent
           </h1>
-
-          <p className="mt-12 text-lg md:text-xl max-w-2xl text-black/70 leading-relaxed">
-            A house of elevated expression.  
-            Where fashion meets symbolism,  
-            and design becomes identity.
-          </p>
-        </motion.div>
-      </section>
-
-      {/* ================= JOURNEY ================= */}
-      <section className="relative py-40 px-10 md:px-24 border-t border-black/10">
-
-        {/* Vertical timeline line */}
-        <div className="absolute left-1/2 top-0 h-full w-[1px] bg-black/10 -translate-x-1/2 hidden md:block" />
-
-        <div className="max-w-6xl mx-auto">
-
-          <h2 className="font-serif text-5xl tracking-[0.25em] uppercase mb-28 text-center">
-            The Journey
-          </h2>
-
-          <div className="space-y-32">
-
-            <motion.div
-              initial={{ opacity: 0, x: -40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1 }}
-              className="md:w-1/2"
-            >
-              <h3 className="text-xl font-serif mb-6">Vision</h3>
-              <p className="text-black/70">
-                Paradise Angels was born from the belief that luxury should
-                feel symbolic, emotional and timeless.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1 }}
-              className="md:w-1/2 md:ml-auto text-right"
-            >
-              <h3 className="text-xl font-serif mb-6">Creation</h3>
-              <p className="text-black/70">
-                Each collection blends craftsmanship, modern elegance and
-                intentional design into wearable statements.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: -40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1 }}
-              className="md:w-1/2"
-            >
-              <h3 className="text-xl font-serif mb-6">Evolution</h3>
-              <p className="text-black/70">
-                Through drops, collaborations and creative storytelling,
-                Paradise Angels continues to grow into a refined identity.
-              </p>
-            </motion.div>
-
-          </div>
         </div>
-      </section>
 
-      {/* ================= PHILOSOPHY ================= */}
-      <section className="py-40 px-10 md:px-24 bg-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="font-serif text-5xl tracking-[0.25em] uppercase mb-16">
-            Philosophy
-          </h2>
-
-          <p className="text-lg text-black/70 leading-relaxed">
-            Luxury is not loud.  
-            It is precise. Intentional. Refined.  
-            Paradise Angels represents identity through elevated design.
+        <div className="absolute right-8 md:right-20 bottom-16 max-w-md">
+          <p className="text-white/55 leading-[2] text-sm md:text-base">
+            A world built around silence, presence and the feeling of being
+            impossible to ignore.
           </p>
         </div>
       </section>
 
-      {/* ================= SOCIAL ================= */}
-      <section className="py-40 px-10 md:px-24 border-t border-black/10">
-        <div className="max-w-5xl mx-auto text-center">
+      <section className="grid lg:grid-cols-[42%_58%] min-h-screen">
+        <div className="px-8 md:px-20 py-28 flex items-center">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.55em] text-black/35">
+              Philosophy
+            </p>
 
-          <h2 className="font-serif text-5xl tracking-[0.25em] uppercase mb-20">
-            Connect
-          </h2>
+            <h2 className="mt-10 font-serif uppercase leading-[0.9] tracking-[0.13em] text-6xl md:text-8xl">
+              Presence
+              <br />
+              Before
+              <br />
+              Noise
+            </h2>
 
-          <div className="flex justify-center gap-16 text-lg tracking-[0.2em] uppercase">
-
-            <a
-              href="#"
-              className="relative group"
-            >
-              Instagram
-              <span className="absolute left-0 -bottom-2 h-[1px] w-0 bg-black transition-all duration-500 group-hover:w-full" />
-            </a>
-
-            <a
-              href="#"
-              className="relative group"
-            >
-              TikTok
-              <span className="absolute left-0 -bottom-2 h-[1px] w-0 bg-black transition-all duration-500 group-hover:w-full" />
-            </a>
-
-            <a
-              href="#"
-              className="relative group"
-            >
-              Pinterest
-              <span className="absolute left-0 -bottom-2 h-[1px] w-0 bg-black transition-all duration-500 group-hover:w-full" />
-            </a>
-
+            <p className="mt-14 max-w-md text-black/55 leading-[2]">
+              Paradise Angels is not designed to shout. It is designed to stay
+              in the room after you leave it.
+            </p>
           </div>
+        </div>
 
+        <div className="relative min-h-screen bg-[#dfd8cc] overflow-hidden">
+          <img
+            src="/about-image.png"
+            alt="Paradise Angels"
+            className="absolute inset-0 h-full w-full object-cover scale-[1.04]"
+          />
+
+          <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+
+          <p className="absolute bottom-10 left-10 text-[10px] uppercase tracking-[0.6em] text-white/60">
+            Amsterdam / Worldwide
+          </p>
         </div>
       </section>
 
-      {/* ================= CLOSING STATEMENT ================= */}
-      <section className="py-32 px-10 md:px-24 text-center bg-[#f4f3ef]">
-        <h3 className="font-serif text-3xl tracking-[0.2em] uppercase">
-          Elevating Identity Through Design
-        </h3>
+      <section className="relative px-8 md:px-20 py-40 bg-[#f4f1ea]">
+        <p className="absolute left-1/2 top-20 -translate-x-1/2 font-serif uppercase tracking-[0.22em] text-[16vw] text-black/[0.035] whitespace-nowrap">
+          Unmatched
+        </p>
+
+        <div className="relative z-10 grid md:grid-cols-3 gap-14">
+          {[
+            ["01", "Silence", "Luxury is not loud. It is controlled."],
+            ["02", "Identity", "Every piece carries a visual language."],
+            ["03", "Emotion", "The brand is felt before it is explained."],
+          ].map((item) => (
+            <div key={item[0]} className="border-t border-black/10 pt-10">
+              <p className="font-serif text-5xl tracking-[0.2em]">{item[0]}</p>
+
+              <h3 className="mt-10 font-serif uppercase tracking-[0.16em] text-3xl">
+                {item[1]}
+              </h3>
+
+              <p className="mt-8 text-black/55 leading-[2]">{item[2]}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
+      <section className="bg-black text-[#f4f1ea] px-8 md:px-20 py-44">
+        <div className="max-w-7xl mx-auto">
+          <p className="text-[10px] uppercase tracking-[0.65em] text-white/35">
+            Manifesto
+          </p>
+
+          <h2 className="mt-12 font-serif uppercase leading-[0.92] tracking-[0.14em] text-6xl md:text-[9vw]">
+            Not worn.
+            <br />
+            Revealed.
+          </h2>
+
+          <div className="mt-20 grid md:grid-cols-2 gap-20">
+            <p className="text-white/55 leading-[2.2] text-lg">
+              Paradise Angels exists between fashion and atmosphere. A symbol
+              for people who move with intention, restraint and quiet power.
+            </p>
+
+            <p className="text-white/55 leading-[2.2] text-lg">
+              It is not about excess. It is about the moment something simple
+              becomes unforgettable.
+            </p>
+          </div>
+
+          <Link
+            href="/shop"
+            className="inline-block mt-24 border border-white/30 px-12 py-5 text-xs uppercase tracking-[0.4em] text-white/70 hover:bg-white hover:text-black transition duration-700"
+          >
+            Enter The Collection
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }

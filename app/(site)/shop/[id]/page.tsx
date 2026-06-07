@@ -26,6 +26,16 @@ type CartItem = {
   quantity: number;
 };
 
+type Review = {
+  id: number;
+  product_id: number;
+  user_id: string | null;
+  customer_email: string | null;
+  rating: number;
+  review: string;
+  created_at: string;
+};
+
 function imagePath(src?: string | null) {
   if (!src) return "/black-hoodie.png";
 
@@ -67,6 +77,10 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true);
   const [openSection, setOpenSection] = useState<string | null>("description");
 
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewText, setReviewText] = useState("");
+  const [reviewRating, setReviewRating] = useState(5);
+  
   useEffect(() => {
     async function loadProduct() {
       const { data, error } = await supabase
@@ -85,6 +99,27 @@ export default function ProductPage() {
 
     loadProduct();
   }, [productId]);
+
+  useEffect(() => {
+  async function loadReviews() {
+    const { data, error } = await supabase
+      .from("product_reviews")
+      .select("*")
+      .eq("product_id", productId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    setReviews((data as Review[]) || []);
+  }
+
+  if (productId) {
+    loadReviews();
+  }
+}, [productId]);
 
   useEffect(() => {
     async function loadWishlist() {
@@ -236,6 +271,45 @@ export default function ProductPage() {
     }
   }
 
+async function submitReview(e: React.FormEvent) {
+  e.preventDefault();
+
+  const { data: sessionData } = await supabase.auth.getSession();
+
+  if (!sessionData.session?.user) {
+    window.location.href = "/login";
+    return;
+  }
+
+  const user = sessionData.session.user;
+
+  if (!reviewText.trim()) {
+    alert("Please write a review.");
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("product_reviews")
+    .insert({
+      product_id: p.id,
+      user_id: user.id,
+      customer_email: user.email,
+      rating: reviewRating,
+      review: reviewText.trim(),
+    })
+    .select()
+    .single();
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  setReviews((prev) => [data as Review, ...prev]);
+  setReviewText("");
+  setReviewRating(5);
+}
+
   const sections = [
     {
       id: "description",
@@ -259,56 +333,102 @@ export default function ProductPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#f7f6f2] text-black">
+    <main className="min-h-screen bg-[#f7f6f2] text-black overflow-x-hidden">
       <section className="pt-28">
-        <div className="grid lg:grid-cols-[58%_42%]">
-          {/* LEFT: BIG LV-STYLE IMAGE AREA */}
-          <section className="bg-[#f1f0ec] border-r border-black/10">
-            <div className="h-20 px-8 md:px-14 flex items-center justify-between border-b border-black/10 bg-[#f7f6f2]">
-              <Link
-                href="/shop"
-                className="text-xs uppercase tracking-[0.35em] text-black/40 hover:text-black transition"
-              >
-                ← Back
-              </Link>
+        <div className="h-5 w-full px-8 md:px-14 flex items-center justify-between bg-[#f7f6f2] border-b border-black/10">
+  <Link
+    href="/shop"
+    className="relative -top-2.5 text-[10px] uppercase tracking-[0.35em] text-black/40"
+  >
+    ← Back
+  </Link>
 
-              <p className="text-xs uppercase tracking-[0.4em] text-black/35">
-                PA-{p.id}
-              </p>
-            </div>
+  <p className="relative -top-2.5 text-[10px] uppercase tracking-[0.4em] text-black/35">
+    PA-{p.id}
+  </p>
+</div>
 
-            {galleryImages.map((image, index) => (
-              <div
-                key={`${image}-${index}`}
-                className="relative h-[calc(100vh-7rem)] min-h-[760px] bg-[#f1f0ec] overflow-hidden"
-              >
-                {galleryImages.length > 1 && (
-                  <div className="absolute top-8 left-8 right-8 z-10 flex items-center justify-between text-xs uppercase tracking-[0.35em] text-black/35">
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    <span>{index === 0 ? "Main" : "View"}</span>
-                  </div>
-                )}
+<div className="grid lg:grid-cols-[55%_45%]">
+  {/* LEFT: BIG LV-STYLE IMAGE AREA */}
+  <section className="bg-[#f1f0ec] border-r border-black/10">
 
-                <img
-                  src={image}
-                  alt={`${p.name} ${index + 1}`}
-                  className="block h-full w-full object-cover object-center"
-                />
-              </div>
-            ))}
+            <div className="bg-[#f1f0ec]">
+           {/* HERO */}
+<div className="relative h-[90vh] min-h-[700px] overflow-hidden">
+  <img
+    src={galleryImages[0]}
+    alt={p.name}
+    className="w-full h-full object-cover"
+  />
+</div>
+
+{/* 2 naast elkaar */}
+{galleryImages.length > 2 && (
+  <div className="grid grid-cols-2">
+    <div className="h-[700px] overflow-hidden">
+      <img
+        src={galleryImages[1]}
+        alt={p.name}
+        className="w-full h-full object-cover"
+      />
+    </div>
+
+    <div className="h-[700px] overflow-hidden">
+      <img
+        src={galleryImages[2]}
+        alt={p.name}
+        className="w-full h-full object-cover"
+      />
+    </div>
+  </div>
+)}
+
+{/* brede foto */}
+{galleryImages.length > 3 && (
+  <div className="h-[900px] overflow-hidden">
+    <img
+      src={galleryImages[3]}
+      alt={p.name}
+      className="w-full h-full object-cover"
+    />
+  </div>
+)}
+
+  {/* WIDE IMAGE */}
+  {galleryImages.length > 3 && (
+    <div className="relative h-[680px] overflow-hidden border-t border-black/10">
+      <img
+        src={galleryImages[3]}
+        alt={`${p.name} full look`}
+        className="block h-full w-full object-cover object-center hover:scale-[1.03] transition duration-[2200ms]"
+      />
+    </div>
+  )}
+
+  {/* EXTRA FIFTH IMAGE */}
+  {galleryImages.length > 4 && (
+    <div className="relative h-[680px] overflow-hidden border-t border-black/10">
+      <img
+        src={galleryImages[4]}
+        alt={`${p.name} editorial`}
+        className="block h-full w-full object-cover object-center hover:scale-[1.03] transition duration-[2200ms]"
+      />
+    </div>
+  )}
+</div>
           </section>
 
           {/* RIGHT: CLEAN STICKY BUY PANEL */}
           <aside className="bg-[#fbfaf7]">
             <div className="lg:sticky lg:top-28 min-h-[calc(100vh-7rem)] px-8 md:px-16 py-14 flex items-center">
-              <div className="w-full max-w-xl mx-auto">
+              <div className="w-full max-w-2xl mx-auto">
                 <div className="flex items-start justify-between gap-8">
                   <div>
                     <p className="text-xs uppercase tracking-[0.45em] text-black/35">
                       {p.category || "Apparel"}
                     </p>
 
-                    <h1 className="mt-7 font-serif text-5xl md:text-6xl uppercase tracking-[0.16em] leading-tight">
+                    <h1 className="mt-7 font-serif text-4xl md:text-6xl uppercase tracking-[0.16em] leading-[1.05] max-w-full break-words">
                       {p.name}
                     </h1>
                   </div>
@@ -402,7 +522,7 @@ export default function ProductPage() {
                   <button
                     type="button"
                     onClick={addToCart}
-                    className="w-full bg-black text-white py-5 rounded-full uppercase tracking-[0.25em] text-xs hover:bg-black/80 transition"
+                    className="w-full bg-black text-white py-6 uppercase tracking-[0.35em] text-[11px] hover:bg-[#1a1a1a] transition duration-700"
                   >
                     {added ? "Added To Bag" : "Add To Shopping Bag"}
                   </button>
@@ -410,7 +530,7 @@ export default function ProductPage() {
                   <button
                     type="button"
                     onClick={checkoutNow}
-                    className="w-full border border-black py-5 rounded-full uppercase tracking-[0.25em] text-xs hover:bg-black hover:text-white transition"
+                    className="w-full border border-black/20 py-6 uppercase tracking-[0.35em] text-[11px] hover:bg-black hover:text-white transition duration-700"
                   >
                     Checkout
                   </button>
@@ -461,6 +581,100 @@ export default function ProductPage() {
           </aside>
         </div>
       </section>
+      <section className="border-t border-black/10 bg-[#f7f6f2] px-8 md:px-24 py-28">
+  <div className="max-w-6xl mx-auto grid lg:grid-cols-[36%_64%] gap-20">
+    <div>
+      <p className="text-[10px] uppercase tracking-[0.55em] text-black/35">
+        Customer Notes
+      </p>
+
+      <h2 className="mt-8 font-serif uppercase tracking-[0.14em] leading-[0.95] text-4xl md:text-6xl">
+        Verified
+        <br />
+        Reviews
+      </h2>
+
+      <p className="mt-10 max-w-sm text-black/55 leading-[2]">
+        Real impressions from customers who experienced Paradise Angels.
+      </p>
+    </div>
+
+    <div>
+      <form
+        onSubmit={submitReview}
+        className="border border-black/10 bg-white/35 p-8 md:p-10"
+      >
+        <p className="text-[10px] uppercase tracking-[0.45em] text-black/35">
+          Leave A Review
+        </p>
+
+        <div className="mt-8 flex gap-2">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              type="button"
+              onClick={() => setReviewRating(star)}
+              className={`text-2xl transition ${
+                star <= reviewRating ? "text-black" : "text-black/20"
+              }`}
+            >
+              ★
+            </button>
+          ))}
+        </div>
+
+        <textarea
+          value={reviewText}
+          onChange={(e) => setReviewText(e.target.value)}
+          required
+          rows={4}
+          placeholder="Share your experience..."
+          className="mt-8 w-full bg-transparent border-b border-black/20 py-4 outline-none placeholder:text-black/30 focus:border-black resize-none"
+        />
+
+        <button
+          type="submit"
+          className="mt-8 border border-black px-10 py-4 uppercase tracking-[0.3em] text-xs hover:bg-black hover:text-white transition"
+        >
+          Submit Review
+        </button>
+      </form>
+
+      <div className="mt-12 space-y-6">
+        {reviews.length === 0 ? (
+          <div className="border border-black/10 p-8 bg-white/25">
+            <p className="text-black/50 leading-[2]">
+              No reviews yet. Be the first verified customer to share your
+              experience.
+            </p>
+          </div>
+        ) : (
+          reviews.map((item) => (
+            <div
+              key={item.id}
+              className="border border-black/10 bg-white/25 p-8"
+            >
+              <div className="flex items-center justify-between gap-6">
+                <div className="tracking-[0.18em]">
+                  {"★".repeat(item.rating)}
+                  <span className="text-black/20">
+                    {"★".repeat(5 - item.rating)}
+                  </span>
+                </div>
+
+                <p className="text-[10px] uppercase tracking-[0.35em] text-black/35">
+                  Verified Customer
+                </p>
+              </div>
+
+              <p className="mt-6 text-black/65 leading-[2]">{item.review}</p>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  </div>
+</section>
     </main>
   );
 }

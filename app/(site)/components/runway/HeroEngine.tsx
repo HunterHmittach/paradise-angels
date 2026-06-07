@@ -1,61 +1,44 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 export default function HeroEngine() {
-  const [scroll, setScroll] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const value = window.scrollY;
-      setScroll(value);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const progress = Math.min(scroll / 600, 1);
-
   return (
-    <section className="relative h-[200vh] bg-[#f4f3ef] text-black">
-      {/* Sticky Hero */}
-      <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen bg-[#f4f1ea] text-black flex items-center justify-center px-6 overflow-hidden">
+      <motion.div
+        initial={{ scale: 1.08, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.08),transparent_55%)]"
+      />
 
-        {/* Vertical Axis Line */}
-        <div
-          className="absolute bg-black transition-all duration-500"
-          style={{
-            width: "1px",
-            height: `${40 + progress * 60}%`,
-            opacity: 0.5 + progress * 0.5,
-          }}
-        />
+      <motion.div
+        initial={{ height: "0%" }}
+        animate={{ height: "62%" }}
+        transition={{ duration: 1.8, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute left-1/2 top-1/2 w-px -translate-x-1/2 -translate-y-1/2 bg-black/15"
+      />
 
-        {/* UNMATCHED */}
-        <div
-          className="absolute text-sm tracking-[0.4em] font-light transition-all duration-500"
-          style={{
-            opacity: 1 - progress,
-            transform: `scale(${1 - progress * 0.2})`,
-          }}
-        >
-          UNMATCHED
-        </div>
+      <motion.div
+        initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
+        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        transition={{ duration: 1.6, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="relative text-center uppercase"
+      >
+        <p className="text-[10px] md:text-xs tracking-[0.7em] text-black/40 mb-10">
+          Collection 01
+        </p>
 
-        {/* PARADISE ANGELS Reveal */}
-        <div
-          className="text-center font-serif tracking-[0.12em] transition-all duration-700"
-          style={{
-            opacity: progress,
-            transform: `translateY(${(1 - progress) * 40}px)`,
-          }}
-        >
-          <div className="text-5xl md:text-7xl">PARADISE</div>
-          <div className="text-5xl md:text-7xl mt-4">ANGELS</div>
-        </div>
+        <h1 className="font-serif text-5xl md:text-8xl leading-[0.9] tracking-[0.12em] text-black/80">
+          Paradise
+          <br />
+          Angels
+        </h1>
 
-      </div>
+        <p className="mt-12 text-[10px] md:text-xs tracking-[0.6em] text-black/45">
+          The First Wing
+        </p>
+      </motion.div>
     </section>
   );
 }

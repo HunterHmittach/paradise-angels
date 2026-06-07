@@ -155,12 +155,15 @@ export default function Shop() {
       </section>
 
       <section className="px-10 md:px-24 py-20">
-        <div className="max-w-7xl mx-auto grid sm:grid-cols-2 lg:grid-cols-3 gap-16">
+        <div className="max-w-[1800px] mx-auto grid md:grid-cols-2 xl:grid-cols-3 gap-x-[1px] gap-y-24 bg-black/10">
           {filteredProducts.map((product) => {
             const isSaved = wishlist.includes(product.id);
 
-            return (
-              <div key={product.id} className="group relative">
+             return (
+               <div
+               key={product.id}
+               className="group relative bg-[#f1eee8]"
+               >
                 <button
                   type="button"
                   onClick={(e) => {
@@ -177,25 +180,31 @@ export default function Shop() {
                 </button>
 
                 <Link href={`/shop/${product.id}`}>
-                  <div className="cursor-pointer">
-                    <div className="relative overflow-hidden bg-[#e9e7df]">
-                      <img
-                        src={product.image_url}
-                        alt={product.name}
-                        className="w-full h-[480px] object-cover transition duration-700 group-hover:scale-105"
-                      />
-                    </div>
+                  <div className="relative overflow-hidden bg-[#ebe7df]">
+                 <img
+                  src={product.image_url}
+                  alt={product.name}
+                  className="w-full h-[78vh] min-h-[700px] object-cover transition duration-[2000ms] group-hover:scale-[1.03]"
+                />
 
-                    <div className="mt-6 flex justify-between items-start">
-                      <h2 className="font-serif text-base tracking-[0.2em] uppercase hover:underline">
-                        {product.name}
-                      </h2>
+                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
 
-                      <p className="text-sm tracking-widest">
-                        €{Number(product.price).toFixed(2)}
-                      </p>
-                    </div>
-                  </div>
+                 <div className="absolute bottom-0 left-0 right-0 p-10 text-white">
+                 <p className="text-[10px] tracking-[0.45em] uppercase opacity-70">
+                 Paradise Angels
+                 </p>
+
+                 <div className="mt-5 flex items-end justify-between gap-6">
+                 <h2 className="font-serif text-3xl md:text-5xl tracking-[0.18em] uppercase leading-none">
+                 {product.name}
+                 </h2>
+
+                 <p className="text-sm tracking-[0.3em] whitespace-nowrap">
+                  €{Number(product.price).toFixed(2)}
+                 </p>
+                 </div>
+                 </div>
+                 </div>
                 </Link>
               </div>
             );
