@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import Navbar from "./components/Navbar";
 
 export default function SiteLayout({
@@ -7,9 +8,12 @@ export default function SiteLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const collectionHasItsOwnNavbar = pathname === "/shop";
+
   return (
     <>
-      <Navbar />
+      {!collectionHasItsOwnNavbar && <Navbar />}
       <main>{children}</main>
     </>
   );
