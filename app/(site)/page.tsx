@@ -1,7 +1,83 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { COLLECTION, GarmentDrawing } from "./shop/first-wing";
 
 const FEATURED = COLLECTION.slice(0, 3);
+
+// Later hoef je alleen deze datum te veranderen.
+const LAUNCH_DATE = "2027-01-01T00:00:00+01:00";
+
+type CountdownTime = {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+};
+
+function getTimeRemaining(): CountdownTime {
+  const distance = Math.max(0, new Date(LAUNCH_DATE).getTime() - Date.now());
+
+  return {
+    days: Math.floor(distance / 86_400_000),
+    hours: Math.floor((distance / 3_600_000) % 24),
+    minutes: Math.floor((distance / 60_000) % 60),
+    seconds: Math.floor((distance / 1_000) % 60),
+  };
+}
+
+function LaunchCountdown() {
+  const [time, setTime] = useState<CountdownTime>({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
+
+  useEffect(() => {
+    const updateCountdown = () => setTime(getTimeRemaining());
+    const initialTimer = window.setTimeout(updateCountdown, 0);
+    const timer = window.setInterval(updateCountdown, 1_000);
+
+    return () => {
+      window.clearTimeout(initialTimer);
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  const units = [
+    ["Days", time.days],
+    ["Hours", time.hours],
+    ["Minutes", time.minutes],
+    ["Seconds", time.seconds],
+  ] as const;
+
+  return (
+    <div className="mt-9">
+      <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-[#f2efe8]/50">
+        Release countdown
+      </p>
+      <div className="grid grid-cols-4 border-y border-[#f2efe8]/20">
+        {units.map(([label, value], index) => (
+          <div
+            key={label}
+            className={`py-4 text-center ${
+              index > 0 ? "border-l border-[#f2efe8]/20" : ""
+            }`}
+          >
+            <span className="block [font-family:Times_New_Roman,Times,serif] text-[clamp(28px,2.7vw,42px)] leading-none">
+              {String(value).padStart(2, "0")}
+            </span>
+            <span className="mt-2 block text-[9px] uppercase tracking-[0.16em] text-[#f2efe8]/50">
+              {label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function WingEight() {
   return (
@@ -57,6 +133,7 @@ export default function HomePage() {
                 eighth that opens into possibility. A first collection built not
                 around noise, but around meaning.
               </p>
+              <LaunchCountdown />
               <Link
                 href="/shop"
                 className="mt-9 inline-flex items-center gap-8 border-b border-[#f2efe8]/45 pb-2 text-[11px] uppercase tracking-[0.18em] transition-all duration-300 hover:gap-11 hover:border-[#f2efe8]"
