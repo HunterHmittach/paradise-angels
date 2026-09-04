@@ -1,680 +1,365 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Heart, Minus, Plus, ChevronDown } from "lucide-react";
-import supabase from "@/lib/supabase";
+import { useParams } from "next/navigation";
+import { COLLECTION, GarmentDrawing } from "../first-wing";
 
-type Product = {
-  id: number;
-  name: string;
-  category?: string | null;
-  price: number;
-  image_url: string;
-  description?: string | null;
-  sizes?: string[] | string | null;
-  gallery_images?: string[] | string | null;
-};
-
-type CartItem = {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-  size?: string | null;
-  quantity: number;
-};
-
-type Review = {
-  id: number;
-  product_id: number;
-  user_id: string | null;
-  customer_email: string | null;
-  rating: number;
-  review: string;
-  created_at: string;
-};
-
-function imagePath(src?: string | null) {
-  if (!src) return "/black-hoodie.png";
-
-  if (src.startsWith("http://") || src.startsWith("https://")) {
-    return src;
-  }
-
-  return src.startsWith("/") ? src : `/${src}`;
-}
-
-function toArray(value?: string[] | string | null) {
-  if (!value) return [];
-
-  if (Array.isArray(value)) {
-    return value;
-  }
-
-  return value
-    .split(/[,\n]+/)
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
-function getGallery(mainImage: string, gallery?: string[] | string | null) {
-  const extras = toArray(gallery).map(imagePath);
-  return Array.from(new Set([mainImage, ...extras]));
-}
+const SIZES = ["XS", "S", "M", "L", "XL"];
 
 export default function ProductPage() {
   const params = useParams();
-  const router = useRouter();
-  const productId = Number(params.id);
+  const requestedSlug = Array.isArray(params.id)
+    ? params.id[0]
+    : String(params.id || "");
+  const currentIndex = COLLECTION.findIndex(
+    (piece) => piece.slug === requestedSlug,
+  );
+  const product = COLLECTION[currentIndex];
 
-  const [product, setProduct] = useState<Product | null>(null);
-  const [wishlist, setWishlist] = useState<number[]>([]);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [quantity, setQuantity] = useState(1);
-  const [added, setAdded] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [openSection, setOpenSection] = useState<string | null>("description");
-
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [reviewText, setReviewText] = useState("");
-  const [reviewRating, setReviewRating] = useState(5);
-  
-  useEffect(() => {
-    async function loadProduct() {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("id", productId)
-        .single();
-
-      if (error) {
-        console.error("Product load error:", error);
-      }
-
-      setProduct((data as Product) || null);
-      setLoading(false);
-    }
-
-    loadProduct();
-  }, [productId]);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [accessOpen, setAccessOpen] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
 
   useEffect(() => {
-  async function loadReviews() {
-    const { data, error } = await supabase
-      .from("product_reviews")
-      .select("*")
-      .eq("product_id", productId)
-      .order("created_at", { ascending: false });
+    if (!accessOpen) return;
 
-    if (error) {
-      console.error(error);
-      return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setAccessOpen(false);
     }
 
-    setReviews((data as Review[]) || []);
+    document.addEventListener("keydown", closeOnEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [accessOpen]);
+
+  function openAccess() {
+    setMenuOpen(false);
+    setRequestSent(false);
+    setAccessOpen(true);
   }
 
-  if (productId) {
-    loadReviews();
-  }
-}, [productId]);
-
-  useEffect(() => {
-    async function loadWishlist() {
-      const { data: sessionData } = await supabase.auth.getSession();
-
-      if (!sessionData.session?.user) return;
-
-      const { data, error } = await supabase
-        .from("wishlists")
-        .select("product_id")
-        .eq("user_id", sessionData.session.user.id);
-
-      if (error) {
-        console.error("Wishlist load error:", error);
-        return;
-      }
-
-      setWishlist(data?.map((item) => item.product_id) || []);
-    }
-
-    loadWishlist();
-  }, []);
-
-  const mainImage = useMemo(() => {
-    return imagePath(product?.image_url);
-  }, [product?.image_url]);
-
-  const galleryImages = useMemo(() => {
-    return getGallery(mainImage, product?.gallery_images);
-  }, [mainImage, product?.gallery_images]);
-
-  const sizes = useMemo(() => {
-    return toArray(product?.sizes);
-  }, [product?.sizes]);
-
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-[#f7f6f2] text-black flex items-center justify-center">
-        <p className="text-xs uppercase tracking-[0.5em] text-black/40">
-          Loading Product
-        </p>
-      </main>
-    );
+  function submitAccessRequest(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setRequestSent(true);
   }
 
   if (!product) {
     return (
-      <main className="min-h-screen bg-[#f7f6f2] text-black flex items-center justify-center px-10">
-        <div className="text-center">
-          <h1 className="font-serif text-4xl tracking-[0.25em] uppercase">
-            Product Not Found
-          </h1>
-
+      <div className="grid min-h-screen place-items-center bg-[#f2efe8] px-6 text-center text-[#0b0b0b]">
+        <div>
+          <h1 className="font-serif text-5xl font-normal">Piece not found</h1>
           <Link
             href="/shop"
-            className="inline-block mt-10 text-xs uppercase tracking-[0.35em] text-black/40 hover:text-black transition"
+            className="mt-8 inline-block text-[10px] uppercase tracking-[0.16em] underline underline-offset-4"
           >
-            Back to Shop
+            Return to collection
           </Link>
         </div>
-      </main>
+      </div>
     );
   }
 
-  const p = product;
-  const isSaved = wishlist.includes(p.id);
-
-  async function toggleWishlist() {
-    const { data: sessionData } = await supabase.auth.getSession();
-
-    if (!sessionData.session?.user) {
-      window.location.href = "/login";
-      return;
-    }
-
-    const user = sessionData.session.user;
-
-    if (isSaved) {
-      const { error } = await supabase
-        .from("wishlists")
-        .delete()
-        .eq("user_id", user.id)
-        .eq("product_id", p.id);
-
-      if (error) {
-        alert(error.message);
-        return;
-      }
-
-      setWishlist((prev) => prev.filter((id) => id !== p.id));
-      return;
-    }
-
-    const { error } = await supabase.from("wishlists").insert({
-      user_id: user.id,
-      customer_email: user.email,
-      product_id: p.id,
-      product_name: p.name,
-      product_image: mainImage,
-      price: p.price,
-    });
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    setWishlist((prev) => [...prev, p.id]);
-  }
-
-  function addToCart() {
-    if (sizes.length > 0 && !selectedSize) {
-      alert("Please select a size.");
-      return false;
-    }
-
-    const existingCart = localStorage.getItem("cart");
-    const cart: CartItem[] = existingCart ? JSON.parse(existingCart) : [];
-
-    const existingItem = cart.find(
-      (item) => item.id === p.id && item.size === selectedSize
-    );
-
-    if (existingItem) {
-      existingItem.quantity += quantity;
-    } else {
-      cart.push({
-        id: p.id,
-        name: p.name,
-        price: Number(p.price),
-        image: mainImage,
-        size: selectedSize,
-        quantity,
-      });
-    }
-
-    localStorage.setItem("cart", JSON.stringify(cart));
-    window.dispatchEvent(new Event("cart-updated"));
-    setAdded(true);
-
-    return true;
-  }
-
-  function checkoutNow() {
-    const success = addToCart();
-
-    if (success) {
-      router.push("/checkout");
-    }
-  }
-
-async function submitReview(e: React.FormEvent) {
-  e.preventDefault();
-
-  const { data: sessionData } = await supabase.auth.getSession();
-
-  if (!sessionData.session?.user) {
-    window.location.href = "/login";
-    return;
-  }
-
-  const user = sessionData.session.user;
-
-  if (!reviewText.trim()) {
-    alert("Please write a review.");
-    return;
-  }
-
-  const { data, error } = await supabase
-    .from("product_reviews")
-    .insert({
-      product_id: p.id,
-      user_id: user.id,
-      customer_email: user.email,
-      rating: reviewRating,
-      review: reviewText.trim(),
-    })
-    .select()
-    .single();
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  setReviews((prev) => [data as Review, ...prev]);
-  setReviewText("");
-  setReviewRating(5);
-}
-
-  const sections = [
-    {
-      id: "description",
-      title: "Description",
-      content:
-        p.description ||
-        "A refined Paradise Angels piece designed with presence, silence and identity.",
-    },
-    {
-      id: "delivery",
-      title: "Delivery & Returns",
-      content:
-        "Worldwide tracked delivery. Shipping details are confirmed after checkout.",
-    },
-    {
-      id: "care",
-      title: "Product Care",
-      content:
-        "Handle with care. Wash gently, avoid harsh heat and preserve the shape of the piece.",
-    },
-  ];
+  const previous = COLLECTION[(currentIndex - 1 + COLLECTION.length) % COLLECTION.length];
+  const next = COLLECTION[(currentIndex + 1) % COLLECTION.length];
 
   return (
-    <main className="min-h-screen bg-[#f7f6f2] text-black overflow-x-hidden">
-      <section className="pt-28">
-        <div className="h-5 w-full px-8 md:px-14 flex items-center justify-between bg-[#f7f6f2] border-b border-black/10">
-  <Link
-    href="/shop"
-    className="relative -top-2.5 text-[10px] uppercase tracking-[0.35em] text-black/40"
-  >
-    ← Back
-  </Link>
-
-  <p className="relative -top-2.5 text-[10px] uppercase tracking-[0.4em] text-black/35">
-    PA-{p.id}
-  </p>
-</div>
-
-<div className="grid lg:grid-cols-[55%_45%]">
-  {/* LEFT: BIG LV-STYLE IMAGE AREA */}
-  <section className="bg-[#f1f0ec] border-r border-black/10">
-
-            <div className="bg-[#f1f0ec]">
-           {/* HERO */}
-<div className="relative h-[90vh] min-h-[700px] overflow-hidden">
-  <img
-    src={galleryImages[0]}
-    alt={p.name}
-    className="w-full h-full object-cover"
-  />
-</div>
-
-{/* 2 naast elkaar */}
-{galleryImages.length > 2 && (
-  <div className="grid grid-cols-2">
-    <div className="h-[700px] overflow-hidden">
-      <img
-        src={galleryImages[1]}
-        alt={p.name}
-        className="w-full h-full object-cover"
+    <div className="min-h-screen bg-[#f2efe8] text-[#0b0b0b] [font-family:Arial,Helvetica,sans-serif]">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-20 opacity-[0.035]"
+        style={{
+          backgroundImage:
+            'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 180 180\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'.9\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\' opacity=\'.65\'/%3E%3C/svg%3E")',
+        }}
       />
-    </div>
 
-    <div className="h-[700px] overflow-hidden">
-      <img
-        src={galleryImages[2]}
-        alt={p.name}
-        className="w-full h-full object-cover"
-      />
-    </div>
-  </div>
-)}
+      <header className="fixed inset-x-0 top-0 z-50 grid h-[76px] grid-cols-[1fr_auto_1fr] items-center border-b border-black/[0.17] bg-[#f2efe8]/[0.93] px-9 backdrop-blur-[18px] max-[900px]:grid-cols-[1fr_auto] max-[900px]:px-5">
+        <nav
+          aria-label="Primary"
+          className="flex items-center gap-6 text-[10px] uppercase tracking-[0.15em] max-[900px]:hidden"
+        >
+          <Link href="/shop" className="hover:opacity-50">
+            ← Collection
+          </Link>
+          <Link href="/about" className="hover:opacity-50">
+            Story
+          </Link>
+        </nav>
 
-{/* brede foto */}
-{galleryImages.length > 3 && (
-  <div className="h-[900px] overflow-hidden">
-    <img
-      src={galleryImages[3]}
-      alt={p.name}
-      className="w-full h-full object-cover"
-    />
-  </div>
-)}
+        <Link
+          href="/"
+          aria-label="Paradise Angels home"
+          className="whitespace-nowrap font-serif text-[17px] uppercase tracking-[0.28em] max-[900px]:col-start-1 max-[900px]:row-start-1 max-[560px]:text-sm max-[560px]:tracking-[0.21em]"
+        >
+          Paradise Angels
+        </Link>
 
-  {/* WIDE IMAGE */}
-  {galleryImages.length > 3 && (
-    <div className="relative h-[680px] overflow-hidden border-t border-black/10">
-      <img
-        src={galleryImages[3]}
-        alt={`${p.name} full look`}
-        className="block h-full w-full object-cover object-center hover:scale-[1.03] transition duration-[2200ms]"
-      />
-    </div>
-  )}
-
-  {/* EXTRA FIFTH IMAGE */}
-  {galleryImages.length > 4 && (
-    <div className="relative h-[680px] overflow-hidden border-t border-black/10">
-      <img
-        src={galleryImages[4]}
-        alt={`${p.name} editorial`}
-        className="block h-full w-full object-cover object-center hover:scale-[1.03] transition duration-[2200ms]"
-      />
-    </div>
-  )}
-</div>
-          </section>
-
-          {/* RIGHT: CLEAN STICKY BUY PANEL */}
-          <aside className="bg-[#fbfaf7]">
-            <div className="lg:sticky lg:top-28 min-h-[calc(100vh-7rem)] px-8 md:px-16 py-14 flex items-center">
-              <div className="w-full max-w-2xl mx-auto">
-                <div className="flex items-start justify-between gap-8">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.45em] text-black/35">
-                      {p.category || "Apparel"}
-                    </p>
-
-                    <h1 className="mt-7 font-serif text-4xl md:text-6xl uppercase tracking-[0.16em] leading-[1.05] max-w-full break-words">
-                      {p.name}
-                    </h1>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={toggleWishlist}
-                    className="h-12 w-12 shrink-0 flex items-center justify-center rounded-full border border-black/10 hover:bg-white transition"
-                    aria-label="Toggle wishlist"
-                  >
-                    <Heart
-                      size={20}
-                      className={isSaved ? "fill-black text-black" : "text-black"}
-                    />
-                  </button>
-                </div>
-
-                <div className="mt-10 border-y border-black/10 py-7 flex items-center justify-between">
-                  <p className="text-xs uppercase tracking-[0.35em] text-black/35">
-                    Price
-                  </p>
-
-                  <p className="text-2xl tracking-[0.25em]">
-                    €{Number(p.price).toFixed(2)}
-                  </p>
-                </div>
-
-                {sizes.length > 0 && (
-                  <div className="mt-9">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs uppercase tracking-[0.35em] text-black/35">
-                        Select Size
-                      </p>
-
-                      <button
-                        type="button"
-                        className="text-xs underline underline-offset-4 text-black/50 hover:text-black transition"
-                      >
-                        Size Guide
-                      </button>
-                    </div>
-
-                    <div className="mt-5 grid grid-cols-4 gap-3">
-                      {sizes.map((size) => (
-                        <button
-                          key={size}
-                          type="button"
-                          onClick={() => setSelectedSize(size)}
-                          className={`h-14 border text-sm tracking-[0.22em] transition ${
-                            selectedSize === size
-                              ? "bg-black text-white border-black"
-                              : "border-black/20 hover:border-black bg-transparent"
-                          }`}
-                        >
-                          {size}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="mt-9">
-                  <p className="text-xs uppercase tracking-[0.35em] text-black/35">
-                    Quantity
-                  </p>
-
-                  <div className="mt-5 flex items-center w-40 border border-black/20">
-                    <button
-                      type="button"
-                      onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                      className="h-12 w-12 flex items-center justify-center hover:bg-black hover:text-white transition"
-                    >
-                      <Minus size={15} />
-                    </button>
-
-                    <div className="h-12 flex-1 flex items-center justify-center text-sm tracking-[0.25em]">
-                      {quantity}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setQuantity((prev) => prev + 1)}
-                      className="h-12 w-12 flex items-center justify-center hover:bg-black hover:text-white transition"
-                    >
-                      <Plus size={15} />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="mt-10 space-y-4">
-                  <button
-                    type="button"
-                    onClick={addToCart}
-                    className="w-full bg-black text-white py-6 uppercase tracking-[0.35em] text-[11px] hover:bg-[#1a1a1a] transition duration-700"
-                  >
-                    {added ? "Added To Bag" : "Add To Shopping Bag"}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={checkoutNow}
-                    className="w-full border border-black/20 py-6 uppercase tracking-[0.35em] text-[11px] hover:bg-black hover:text-white transition duration-700"
-                  >
-                    Checkout
-                  </button>
-                </div>
-
-                <p className="mt-6 text-center text-sm text-black/45">
-                  Complimentary tracked delivery on every order.
-                </p>
-
-                <div className="mt-12">
-                  {sections.map((section) => {
-                    const isOpen = openSection === section.id;
-
-                    return (
-                      <div key={section.id} className="border-t border-black/10">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setOpenSection(isOpen ? null : section.id)
-                          }
-                          className="w-full py-5 flex items-center justify-between text-left"
-                        >
-                          <span className="text-sm tracking-[0.18em]">
-                            {section.title}
-                          </span>
-
-                          <ChevronDown
-                            size={18}
-                            className={`transition ${
-                              isOpen ? "rotate-180" : ""
-                            }`}
-                          />
-                        </button>
-
-                        {isOpen && (
-                          <p className="pb-6 text-black/55 leading-relaxed">
-                            {section.content}
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })}
-
-                  <div className="border-t border-black/10" />
-                </div>
-              </div>
-            </div>
-          </aside>
-        </div>
-      </section>
-      <section className="border-t border-black/10 bg-[#f7f6f2] px-8 md:px-24 py-28">
-  <div className="max-w-6xl mx-auto grid lg:grid-cols-[36%_64%] gap-20">
-    <div>
-      <p className="text-[10px] uppercase tracking-[0.55em] text-black/35">
-        Customer Notes
-      </p>
-
-      <h2 className="mt-8 font-serif uppercase tracking-[0.14em] leading-[0.95] text-4xl md:text-6xl">
-        Verified
-        <br />
-        Reviews
-      </h2>
-
-      <p className="mt-10 max-w-sm text-black/55 leading-[2]">
-        Real impressions from customers who experienced Paradise Angels.
-      </p>
-    </div>
-
-    <div>
-      <form
-        onSubmit={submitReview}
-        className="border border-black/10 bg-white/35 p-8 md:p-10"
-      >
-        <p className="text-[10px] uppercase tracking-[0.45em] text-black/35">
-          Leave A Review
-        </p>
-
-        <div className="mt-8 flex gap-2">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              type="button"
-              onClick={() => setReviewRating(star)}
-              className={`text-2xl transition ${
-                star <= reviewRating ? "text-black" : "text-black/20"
-              }`}
-            >
-              ★
-            </button>
-          ))}
-        </div>
-
-        <textarea
-          value={reviewText}
-          onChange={(e) => setReviewText(e.target.value)}
-          required
-          rows={4}
-          placeholder="Share your experience..."
-          className="mt-8 w-full bg-transparent border-b border-black/20 py-4 outline-none placeholder:text-black/30 focus:border-black resize-none"
-        />
+        <nav
+          aria-label="Secondary"
+          className="flex items-center justify-end gap-6 text-[10px] uppercase tracking-[0.15em] max-[900px]:hidden"
+        >
+          <Link href="/shop" className="hover:opacity-50">
+            The First Wing
+          </Link>
+          <button
+            type="button"
+            onClick={openAccess}
+            className="bg-transparent uppercase tracking-[0.15em] hover:opacity-50"
+          >
+            Private access
+          </button>
+        </nav>
 
         <button
-          type="submit"
-          className="mt-8 border border-black px-10 py-4 uppercase tracking-[0.3em] text-xs hover:bg-black hover:text-white transition"
+          type="button"
+          aria-expanded={menuOpen}
+          aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+          onClick={() => setMenuOpen((current) => !current)}
+          className="hidden bg-transparent py-3 text-[10px] uppercase tracking-[0.14em] max-[900px]:col-start-2 max-[900px]:row-start-1 max-[900px]:block"
         >
-          Submit Review
+          {menuOpen ? "Close" : "Menu"}
         </button>
-      </form>
 
-      <div className="mt-12 space-y-6">
-        {reviews.length === 0 ? (
-          <div className="border border-black/10 p-8 bg-white/25">
-            <p className="text-black/50 leading-[2]">
-              No reviews yet. Be the first verified customer to share your
-              experience.
-            </p>
-          </div>
-        ) : (
-          reviews.map((item) => (
-            <div
-              key={item.id}
-              className="border border-black/10 bg-white/25 p-8"
+        {menuOpen && (
+          <nav className="fixed inset-x-0 top-[76px] flex flex-col items-start gap-[22px] border-t border-black/[0.17] bg-[#f2efe8] px-5 py-[30px] text-[10px] uppercase tracking-[0.15em]">
+            <Link href="/shop" onClick={() => setMenuOpen(false)}>
+              Collection / The First Wing
+            </Link>
+            <Link href="/about" onClick={() => setMenuOpen(false)}>
+              Story
+            </Link>
+            <button
+              type="button"
+              onClick={openAccess}
+              className="bg-transparent uppercase tracking-[0.15em]"
             >
-              <div className="flex items-center justify-between gap-6">
-                <div className="tracking-[0.18em]">
-                  {"★".repeat(item.rating)}
-                  <span className="text-black/20">
-                    {"★".repeat(5 - item.rating)}
-                  </span>
-                </div>
-
-                <p className="text-[10px] uppercase tracking-[0.35em] text-black/35">
-                  Verified Customer
-                </p>
-              </div>
-
-              <p className="mt-6 text-black/65 leading-[2]">{item.review}</p>
-            </div>
-          ))
+              Private access
+            </button>
+          </nav>
         )}
-      </div>
+      </header>
+
+      <main>
+        <section className="grid min-h-[100svh] grid-cols-[minmax(0,1.15fr)_minmax(380px,0.85fr)] max-[900px]:grid-cols-1">
+          <div className="sticky top-0 grid min-h-[100svh] place-items-center overflow-hidden bg-[#d4d0c7] max-[900px]:relative max-[900px]:min-h-[70svh]">
+            <GarmentDrawing
+              piece={product}
+              className="h-[78%] w-[78%]"
+            />
+            <span className="absolute bottom-[25px] left-7 font-serif text-[54px] italic">
+              {product.index}
+            </span>
+          </div>
+
+          <div className="flex min-h-[100svh] flex-col justify-center px-[8vw] pb-20 pt-[150px] max-[900px]:min-h-0 max-[900px]:px-6 max-[900px]:py-[75px]">
+            <p className="m-0 text-[10px] uppercase tracking-[0.2em]">
+              The First Wing · {product.index} / 08
+            </p>
+
+            <h1 className="mb-[25px] mt-4 font-serif text-[clamp(47px,5.5vw,82px)] font-normal leading-[0.89] tracking-[-0.045em]">
+              {product.name}
+            </h1>
+
+            <p className="max-w-[450px] text-[13px] leading-[1.5] text-[#5e5b55]">
+              {product.story}
+            </p>
+
+            <div className="my-8 flex justify-between border-y border-black/[0.17] py-[19px] text-[9px] uppercase tracking-[0.14em]">
+              <span>{product.color}</span>
+              <span>Preview · 2027</span>
+            </div>
+
+            {product.category !== "accessories" && (
+              <div className="mb-[30px]">
+                <span className="mb-3 block text-[9px] uppercase tracking-[0.15em]">
+                  Preview size
+                </span>
+                <div
+                  className="flex flex-wrap gap-2"
+                  role="group"
+                  aria-label="Select size"
+                >
+                  {SIZES.map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => setSelectedSize(size)}
+                      className={`grid h-[43px] w-[43px] place-items-center border border-black/[0.17] text-xs transition ${
+                        selectedSize === size
+                          ? "bg-[#0b0b0b] text-[#f2efe8]"
+                          : "bg-transparent hover:bg-[#0b0b0b] hover:text-[#f2efe8]"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={openAccess}
+              className="flex min-h-14 items-center justify-between gap-[60px] border border-[#0b0b0b] bg-[#0b0b0b] px-6 text-[9px] uppercase tracking-[0.15em] text-[#f2efe8] transition hover:bg-transparent hover:text-[#0b0b0b]"
+            >
+              <span>Request access to this piece</span>
+              <span aria-hidden="true">→</span>
+            </button>
+
+            <dl className="mt-9 border-t border-black/[0.17]">
+              {[
+                ["Material", product.material],
+                ["Silhouette", product.fit],
+                ["Details", product.detail],
+                ["Note", "Prototype specifications are subject to final sampling."],
+              ].map(([term, description]) => (
+                <div
+                  key={term}
+                  className="grid grid-cols-[130px_1fr] gap-5 border-b border-black/[0.17] py-4 text-[11px] max-[560px]:grid-cols-1 max-[560px]:gap-2"
+                >
+                  <dt className="uppercase tracking-[0.12em] text-[#716e68]">
+                    {term}
+                  </dt>
+                  <dd className="m-0">{description}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+
+        <nav
+          aria-label="Browse products"
+          className="grid grid-cols-2 border-t border-black/[0.17] max-[560px]:grid-cols-1"
+        >
+          <Link
+            href={`/shop/${previous.slug}`}
+            className="flex justify-between px-[4vw] py-9 text-[9px] uppercase tracking-[0.14em] transition hover:bg-[#0b0b0b] hover:text-[#f2efe8]"
+          >
+            <span>← Previous</span>
+            <span>{previous.name}</span>
+          </Link>
+          <Link
+            href={`/shop/${next.slug}`}
+            className="flex justify-between border-l border-black/[0.17] px-[4vw] py-9 text-[9px] uppercase tracking-[0.14em] transition hover:bg-[#0b0b0b] hover:text-[#f2efe8] max-[560px]:border-l-0 max-[560px]:border-t"
+          >
+            <span>{next.name}</span>
+            <span>Next →</span>
+          </Link>
+        </nav>
+      </main>
+
+      <footer className="flex min-h-[48vh] flex-col justify-between bg-[#0b0b0b] px-[4vw] pb-[35px] pt-20 text-[#f2efe8]">
+        <div className="font-serif text-[clamp(47px,10.8vw,162px)] leading-[0.8] tracking-[-0.055em]">
+          Paradise Angels
+        </div>
+        <div className="flex justify-between gap-5 text-[9px] uppercase tracking-[0.13em] text-[#f2efe8]/60 max-[560px]:flex-col">
+          <span>Amsterdam · Est. 2027</span>
+          <div className="flex gap-[22px]">
+            <Link href="/shop">Collection</Link>
+            <Link href="/about">Story</Link>
+          </div>
+          <span>© {new Date().getFullYear()} HoPA</span>
+        </div>
+      </footer>
+
+      {accessOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="access-title"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setAccessOpen(false);
+          }}
+          className="fixed inset-0 z-[100] grid place-items-center bg-black/70 p-5"
+        >
+          <div className="w-full max-w-[590px] bg-[#f2efe8] p-[42px] text-[#0b0b0b] max-[560px]:px-[22px] max-[560px]:py-7">
+            <div className="flex items-start justify-between gap-6">
+              <div>
+                <p className="m-0 text-[10px] uppercase tracking-[0.2em]">
+                  Private release · 2027
+                </p>
+                <h2
+                  id="access-title"
+                  className="mb-[15px] mt-0 font-serif text-5xl font-normal leading-[0.9] max-[560px]:text-[39px]"
+                >
+                  Request access
+                </h2>
+              </div>
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={() => setAccessOpen(false)}
+                className="bg-transparent text-[25px] leading-none"
+              >
+                ×
+              </button>
+            </div>
+
+            {!requestSent ? (
+              <>
+                <p className="text-xs text-[#69655f]">
+                  Register your interest in {product.name} and the private
+                  release.
+                </p>
+                <form
+                  onSubmit={submitAccessRequest}
+                  className="mt-7 grid gap-3"
+                >
+                  <label className="grid gap-[7px] text-[9px] uppercase tracking-[0.13em]">
+                    Name
+                    <input
+                      name="name"
+                      autoComplete="name"
+                      required
+                      className="min-h-[45px] rounded-none border-0 border-b border-black/[0.17] bg-transparent outline-none focus:border-black"
+                    />
+                  </label>
+                  <label className="grid gap-[7px] text-[9px] uppercase tracking-[0.13em]">
+                    Email
+                    <input
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      required
+                      className="min-h-[45px] rounded-none border-0 border-b border-black/[0.17] bg-transparent outline-none focus:border-black"
+                    />
+                  </label>
+                  <button
+                    type="submit"
+                    className="mt-4 flex min-h-[52px] items-center justify-between border border-black bg-black px-6 text-[9px] uppercase tracking-[0.16em] text-[#f2efe8]"
+                  >
+                    <span>Submit request</span>
+                    <span aria-hidden="true">→</span>
+                  </button>
+                  <p className="text-[9px] text-[#69655f]">
+                    Prototype preview: no details are transmitted or stored
+                    yet.
+                  </p>
+                </form>
+              </>
+            ) : (
+              <div className="grid min-h-[285px] place-items-center text-center">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-[#69655f]">
+                    Request noted
+                  </p>
+                  <h2 className="font-serif text-5xl font-normal leading-[0.9]">
+                    Until the door opens.
+                  </h2>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
-  </div>
-</section>
-    </main>
   );
 }

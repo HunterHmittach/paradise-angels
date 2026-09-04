@@ -9,7 +9,7 @@ export default function SiteLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const collectionHasItsOwnNavbar = pathname === "/shop";
+  const collectionHasItsOwnNavbar = pathname.startsWith("/shop");
 
   return (
     <>
