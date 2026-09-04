@@ -21,7 +21,6 @@ const FILTERS: Array<{
 
 export default function Shop() {
   const [filter, setFilter] = useState<CollectionFilter>("all");
-  const [menuOpen, setMenuOpen] = useState(false);
   const [accessOpen, setAccessOpen] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
 
@@ -49,7 +48,6 @@ export default function Shop() {
       : COLLECTION.filter((piece) => piece.category === filter);
 
   function openAccess() {
-    setMenuOpen(false);
     setRequestSent(false);
     setAccessOpen(true);
   }
@@ -69,76 +67,6 @@ export default function Shop() {
             'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 180 180\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'.9\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\' opacity=\'.65\'/%3E%3C/svg%3E")',
         }}
       />
-
-      <header className="fixed inset-x-0 top-0 z-50 grid h-[83px] grid-cols-[1fr_auto_1fr] items-center border-b border-black/[0.17] bg-[#f2efe8]/[0.93] px-[39px] backdrop-blur-[18px] max-[900px]:grid-cols-[1fr_auto] max-[900px]:px-5">
-        <nav
-          aria-label="Primary"
-          className="flex items-center gap-[26px] text-[11px] uppercase tracking-[0.15em] max-[900px]:hidden"
-        >
-          <Link
-            href="/shop"
-            aria-current="page"
-            className="relative after:absolute after:inset-x-0 after:-bottom-1 after:h-px after:bg-current"
-          >
-            Collection
-          </Link>
-          <Link href="/about" className="hover:opacity-50">
-            Story
-          </Link>
-        </nav>
-
-        <Link
-          href="/"
-          aria-label="Paradise Angels home"
-          className="whitespace-nowrap [font-family:Times_New_Roman,Times,serif] text-[18.5px] uppercase tracking-[0.28em] max-[900px]:col-start-1 max-[900px]:row-start-1 max-[560px]:text-sm max-[560px]:tracking-[0.21em]"
-        >
-          Paradise Angels
-        </Link>
-
-        <nav
-          aria-label="Secondary"
-          className="flex items-center gap-[26px] text-[11px] uppercase tracking-[0.15em] max-[900px]:hidden"
-        >
-          <Link href="/shop" className="hover:opacity-50">
-            The First Wing
-          </Link>
-          <button
-            type="button"
-            onClick={openAccess}
-            className="bg-transparent uppercase tracking-[0.15em] hover:opacity-50"
-          >
-            Private access
-          </button>
-        </nav>
-
-        <button
-          type="button"
-          aria-expanded={menuOpen}
-          aria-label={menuOpen ? "Close navigation" : "Open navigation"}
-          onClick={() => setMenuOpen((current) => !current)}
-          className="hidden bg-transparent py-3 text-[10px] uppercase tracking-[0.14em] max-[900px]:col-start-2 max-[900px]:row-start-1 max-[900px]:block"
-        >
-          {menuOpen ? "Close" : "Menu"}
-        </button>
-
-        {menuOpen && (
-          <nav className="fixed inset-x-0 top-[83px] flex flex-col items-start gap-[22px] border-t border-black/[0.17] bg-[#f2efe8] px-5 py-[30px] text-[10px] uppercase tracking-[0.15em]">
-            <Link href="/shop" onClick={() => setMenuOpen(false)}>
-              Collection / The First Wing
-            </Link>
-            <Link href="/about" onClick={() => setMenuOpen(false)}>
-              Story
-            </Link>
-            <button
-              type="button"
-              onClick={openAccess}
-              className="bg-transparent uppercase tracking-[0.15em]"
-            >
-              Private access
-            </button>
-          </nav>
-        )}
-      </header>
 
       <main>
         <section className="px-[4vw] pb-[70px] pt-40 max-[900px]:px-5 max-[900px]:pb-[55px] max-[900px]:pt-[130px]">
