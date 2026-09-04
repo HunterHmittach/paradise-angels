@@ -90,7 +90,7 @@ export default function Shop() {
         <Link
           href="/"
           aria-label="Paradise Angels home"
-          className="whitespace-nowrap font-serif text-[17px] uppercase tracking-[0.28em] max-[900px]:col-start-1 max-[900px]:row-start-1 max-[560px]:text-sm max-[560px]:tracking-[0.21em]"
+          className="whitespace-nowrap [font-family:Times_New_Roman,Times,serif] text-[17px] uppercase tracking-[0.28em] max-[900px]:col-start-1 max-[900px]:row-start-1 max-[560px]:text-sm max-[560px]:tracking-[0.21em]"
         >
           Paradise Angels
         </Link>
@@ -146,7 +146,7 @@ export default function Shop() {
             <p className="m-0 text-[10px] uppercase tracking-[0.2em]">
               Collection 001 · Eight pieces
             </p>
-            <h1 className="m-0 font-serif text-[clamp(45px,6.8vw,98px)] font-normal leading-[0.9] tracking-[-0.045em]">
+            <h1 className="m-0 [font-family:Times_New_Roman,Times,serif] text-[clamp(45px,6.8vw,98px)] font-normal leading-[0.9] tracking-[-0.045em]">
               The First <em className="font-normal">Wing</em>
             </h1>
           </div>
@@ -212,7 +212,7 @@ export default function Shop() {
             <p className="m-0 text-[10px] uppercase tracking-[0.2em]">
               Private release · 2027
             </p>
-            <h2 className="mt-6 max-w-[800px] font-serif text-[clamp(45px,6.8vw,98px)] font-normal leading-[0.9] tracking-[-0.045em]">
+            <h2 className="mt-6 max-w-[800px] [font-family:Times_New_Roman,Times,serif] text-[clamp(45px,6.8vw,98px)] font-normal leading-[0.9] tracking-[-0.045em]">
               Be present when the
               <br />
               <em className="font-normal">eighth door opens.</em>
@@ -230,7 +230,7 @@ export default function Shop() {
       </main>
 
       <footer className="flex min-h-[48vh] flex-col justify-between bg-[#0b0b0b] px-[4vw] pb-[35px] pt-20 text-[#f2efe8]">
-        <div className="font-serif text-[clamp(47px,10.8vw,162px)] leading-[0.8] tracking-[-0.055em]">
+        <div className="[font-family:Times_New_Roman,Times,serif] text-[clamp(47px,10.8vw,162px)] leading-[0.8] tracking-[-0.055em]">
           Paradise Angels
         </div>
         <div className="flex justify-between gap-5 text-[9px] uppercase tracking-[0.13em] text-[#f2efe8]/60 max-[560px]:flex-col">
@@ -268,7 +268,7 @@ export default function Shop() {
                 </p>
                 <h2
                   id="access-title"
-                  className="mb-[15px] mt-0 font-serif text-5xl font-normal leading-[0.9] max-[560px]:text-[39px]"
+                  className="mb-[15px] mt-0 [font-family:Times_New_Roman,Times,serif] text-5xl font-normal leading-[0.9] max-[560px]:text-[39px]"
                 >
                   Request access
                 </h2>
@@ -331,7 +331,7 @@ export default function Shop() {
                   <p className="text-[10px] uppercase tracking-[0.2em] text-[#69655f]">
                     Request noted
                   </p>
-                  <h2 className="font-serif text-5xl font-normal leading-[0.9]">
+                  <h2 className="[font-family:Times_New_Roman,Times,serif] text-5xl font-normal leading-[0.9]">
                     Until the door opens.
                   </h2>
                 </div>
