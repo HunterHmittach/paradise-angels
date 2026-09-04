@@ -81,10 +81,10 @@ export default function ProductPage() {
         }}
       />
 
-      <header className="fixed inset-x-0 top-0 z-50 grid h-[76px] grid-cols-[1fr_auto_1fr] items-center border-b border-black/[0.17] bg-[#f2efe8]/[0.93] px-9 backdrop-blur-[18px] max-[900px]:grid-cols-[1fr_auto] max-[900px]:px-5">
+      <header className="fixed inset-x-0 top-0 z-50 grid h-[83px] grid-cols-[1fr_auto_1fr] items-center border-b border-black/[0.17] bg-[#f2efe8]/[0.93] px-[39px] backdrop-blur-[18px] max-[900px]:grid-cols-[1fr_auto] max-[900px]:px-5">
         <nav
           aria-label="Primary"
-          className="flex items-center gap-6 text-[10px] uppercase tracking-[0.15em] max-[900px]:hidden"
+          className="flex items-center gap-[26px] text-[11px] uppercase tracking-[0.15em] max-[900px]:hidden"
         >
           <Link href="/shop" className="hover:opacity-50">
             ← Collection
@@ -97,14 +97,14 @@ export default function ProductPage() {
         <Link
           href="/"
           aria-label="Paradise Angels home"
-          className="whitespace-nowrap [font-family:Times_New_Roman,Times,serif] text-[17px] uppercase tracking-[0.28em] max-[900px]:col-start-1 max-[900px]:row-start-1 max-[560px]:text-sm max-[560px]:tracking-[0.21em]"
+          className="whitespace-nowrap [font-family:Times_New_Roman,Times,serif] text-[18.5px] uppercase tracking-[0.28em] max-[900px]:col-start-1 max-[900px]:row-start-1 max-[560px]:text-sm max-[560px]:tracking-[0.21em]"
         >
           Paradise Angels
         </Link>
 
         <nav
           aria-label="Secondary"
-          className="flex items-center gap-6 text-[10px] uppercase tracking-[0.15em] max-[900px]:hidden"
+          className="flex items-center gap-[26px] text-[11px] uppercase tracking-[0.15em] max-[900px]:hidden"
         >
           <Link href="/shop" className="hover:opacity-50">
             The First Wing
@@ -129,7 +129,7 @@ export default function ProductPage() {
         </button>
 
         {menuOpen && (
-          <nav className="fixed inset-x-0 top-[76px] flex flex-col items-start gap-[22px] border-t border-black/[0.17] bg-[#f2efe8] px-5 py-[30px] text-[10px] uppercase tracking-[0.15em]">
+          <nav className="fixed inset-x-0 top-[83px] flex flex-col items-start gap-[22px] border-t border-black/[0.17] bg-[#f2efe8] px-5 py-[30px] text-[10px] uppercase tracking-[0.15em]">
             <Link href="/shop" onClick={() => setMenuOpen(false)}>
               Collection / The First Wing
             </Link>
