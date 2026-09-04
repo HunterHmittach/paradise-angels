@@ -161,7 +161,7 @@ export default function HomePage() {
             <Link href="/about">Story</Link>
             <Link href="/contact">Contact</Link>
           </div>
-          <span>© {new Date().getFullYear()} HoPA</span>
+          <span>© {new Date().getFullYear()} Paradise Angels</span>
         </div>
       </footer>
 

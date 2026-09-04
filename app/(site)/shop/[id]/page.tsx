@@ -198,7 +198,7 @@ export default function ProductPage() {
             <Link href="/shop">Collection</Link>
             <Link href="/about">Story</Link>
           </div>
-          <span>© {new Date().getFullYear()} HoPA</span>
+          <span>© {new Date().getFullYear()} Paradise Angels</span>
         </div>
       </footer>
 

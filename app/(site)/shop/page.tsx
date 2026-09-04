@@ -174,7 +174,7 @@ export default function Shop() {
               Access
             </button>
           </div>
-          <span>© {new Date().getFullYear()} HoPA</span>
+          <span>© {new Date().getFullYear()} Paradise Angels</span>
         </div>
       </footer>
 
