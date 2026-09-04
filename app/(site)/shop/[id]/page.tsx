@@ -104,7 +104,7 @@ export default function ProductPage() {
 
         <nav
           aria-label="Secondary"
-          className="flex items-center justify-end gap-6 text-[10px] uppercase tracking-[0.15em] max-[900px]:hidden"
+          className="flex items-center gap-6 text-[10px] uppercase tracking-[0.15em] max-[900px]:hidden"
         >
           <Link href="/shop" className="hover:opacity-50">
             The First Wing
