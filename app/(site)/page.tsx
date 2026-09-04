@@ -7,7 +7,7 @@ import { COLLECTION, GarmentDrawing } from "./shop/first-wing";
 const FEATURED = COLLECTION.slice(0, 3);
 
 // Later hoef je alleen deze datum te veranderen.
-const LAUNCH_DATE = "2027-01-01T00:00:00+01:00";
+const LAUNCH_DATE = "2027-12-31T00:00:00+01:00";
 
 type CountdownTime = {
   days: number;
