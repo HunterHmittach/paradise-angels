@@ -14,6 +14,41 @@ import {
   type CollectionPiece,
 } from "../shop/first-wing";
 
+const DOOR_MEANINGS: Record<string, { title: string; copy: string }> = {
+  "ascension-zip": {
+    title: "Ascension",
+    copy: "The first movement upward. Restraint becomes direction and the journey takes form.",
+  },
+  "halo-zip": {
+    title: "Light",
+    copy: "A quiet counterpoint to shadow. Proof that softness can still hold structure.",
+  },
+  "seraph-tee": {
+    title: "Purity",
+    copy: "Reduced to what matters: proportion, weight and the confidence to leave space untouched.",
+  },
+  "silence-tee": {
+    title: "Silence",
+    copy: "Presence without announcement. A piece that holds attention before a mark asks for it.",
+  },
+  "passage-trouser": {
+    title: "Passage",
+    copy: "Made for the distance between where you began and what you are becoming.",
+  },
+  "gate-trouser": {
+    title: "Threshold",
+    copy: "A gate is both an ending and an invitation. Crossing it is always a choice.",
+  },
+  "eighth-door-chain": {
+    title: "Connection",
+    copy: "Eight forms held as one. Each link remembers the threshold before it.",
+  },
+  "first-wing-cap": {
+    title: "Flight",
+    copy: "The final piece of the chapter, carrying the sign that the first movement has begun.",
+  },
+};
+
 function ChapterLabel({ children }: { children: React.ReactNode }) {
   return (
     <p className="m-0 text-xs uppercase tracking-[0.2em] opacity-55">
@@ -116,59 +151,149 @@ function OpeningDoor() {
   );
 }
 
-function CollectionArchive() {
+function EightDoorsArchive() {
   const [activePiece, setActivePiece] = useState<CollectionPiece>(COLLECTION[0]);
 
   return (
-    <section className="grid min-h-screen grid-cols-2 bg-[#d8d4cb] text-[#0b0b0b] max-[900px]:grid-cols-1">
-      <div className="sticky top-[83px] h-[calc(100svh-83px)] overflow-hidden border-r border-black/15 max-[900px]:relative max-[900px]:top-0 max-[900px]:h-[60svh] max-[900px]:border-b max-[900px]:border-r-0">
-        <GarmentDrawing piece={activePiece} />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/55 to-transparent px-7 pb-7 pt-24 text-[#f2efe8]">
-          <div>
-            <p className="m-0 text-xs uppercase tracking-[0.18em] opacity-65">
-              PA / {activePiece.index}
-            </p>
-            <p className="mb-0 mt-2 [font-family:Times_New_Roman,Times,serif] text-[clamp(29px,3vw,47px)] leading-none">
-              {activePiece.name}
-            </p>
-          </div>
-          <p className="m-0 text-xs uppercase tracking-[0.18em]">
-            {activePiece.color}
+    <section className="bg-[#0b0b0b] py-[10vw] text-[#f2efe8] max-[900px]:py-24">
+      <div className="mb-16 grid grid-cols-[0.55fr_1.45fr] gap-8 px-[4vw] max-[900px]:grid-cols-1 max-[900px]:px-5">
+        <ChapterLabel>Chapter III · The First Wing</ChapterLabel>
+        <Reveal>
+          <h2 className="m-0 [font-family:Times_New_Roman,Times,serif] text-[clamp(52px,7.5vw,116px)] font-normal leading-[0.82] tracking-[-0.06em]">
+            Eight doors.
+            <br />
+            <em className="font-normal">Choose one.</em>
+          </h2>
+          <p className="mb-0 mt-9 max-w-[560px] text-base leading-[1.7] text-[#f2efe8]/55">
+            Each piece carries its own threshold. Move across the doors to
+            reveal the meaning held behind the form.
           </p>
-        </div>
+        </Reveal>
       </div>
 
-      <div className="px-[6vw] py-[11vw] max-[900px]:px-5 max-[900px]:py-20">
-        <Reveal>
-          <ChapterLabel>Chapter III · The First Wing</ChapterLabel>
-          <h2 className="mb-16 mt-6 [font-family:Times_New_Roman,Times,serif] text-[clamp(51px,6.5vw,100px)] font-normal leading-[0.84] tracking-[-0.055em]">
-            Eight pieces.
-            <br />
-            <em className="font-normal">One passage.</em>
-          </h2>
-        </Reveal>
+      <div className="mx-[4vw] flex h-[720px] overflow-hidden border-y border-[#f2efe8]/20 max-[900px]:hidden">
+        {COLLECTION.map((piece) => {
+          const active = activePiece.slug === piece.slug;
+          const meaning = DOOR_MEANINGS[piece.slug];
 
-        <div className="border-t border-black/20">
-          {COLLECTION.map((piece) => (
-            <Link
+          return (
+            <div
               key={piece.slug}
-              href={`/shop/${piece.slug}`}
               onMouseEnter={() => setActivePiece(piece)}
-              onFocus={() => setActivePiece(piece)}
-              className="group grid grid-cols-[50px_1fr_auto] items-center gap-4 border-b border-black/20 py-5 transition-[padding] duration-300 hover:px-3 focus-visible:px-3 focus-visible:outline-none max-[560px]:grid-cols-[38px_1fr]"
+              className={`relative min-w-0 overflow-hidden border-r border-[#f2efe8]/20 transition-[flex] duration-700 [transition-timing-function:cubic-bezier(.22,1,.36,1)] last:border-r-0 ${
+                active ? "flex-[5] bg-[#d8d4cb]" : "flex-[0.65] bg-[#111110]"
+              }`}
             >
-              <span className="text-xs tracking-[0.15em] opacity-50">
-                {piece.index}
-              </span>
-              <span className="[font-family:Times_New_Roman,Times,serif] text-[clamp(22px,2.4vw,36px)] leading-none">
-                {piece.name}
-              </span>
-              <span className="text-xs uppercase tracking-[0.15em] opacity-55 max-[560px]:col-start-2 max-[560px]:mt-1">
-                {piece.type} · {piece.color} <span aria-hidden="true">↗</span>
-              </span>
-            </Link>
-          ))}
-        </div>
+              {active ? (
+                <div className="grid h-full grid-cols-[1.08fr_.92fr] text-[#0b0b0b]">
+                  <div className="relative min-w-0 overflow-hidden border-r border-black/15">
+                    <GarmentDrawing piece={piece} />
+                    <span className="absolute left-5 top-5 text-xs uppercase tracking-[0.18em] opacity-50">
+                      Door {piece.index} / 08
+                    </span>
+                  </div>
+
+                  <div className="flex min-w-[270px] flex-col justify-between p-[3vw]">
+                    <div className="flex items-start justify-between gap-5 text-xs uppercase tracking-[0.16em] opacity-50">
+                      <span>{piece.type}</span>
+                      <span>{piece.color}</span>
+                    </div>
+                    <div>
+                      <p className="mb-6 text-xs uppercase tracking-[0.2em] opacity-50">
+                        {meaning.title}
+                      </p>
+                      <h3 className="m-0 [font-family:Times_New_Roman,Times,serif] text-[clamp(39px,4.1vw,64px)] font-normal leading-[0.85] tracking-[-0.045em]">
+                        {piece.name}
+                      </h3>
+                      <p className="mb-0 mt-8 text-base leading-[1.7] text-black/65">
+                        {meaning.copy}
+                      </p>
+                    </div>
+                    <Link
+                      href={`/shop/${piece.slug}`}
+                      className="inline-flex w-fit items-center gap-8 border-b border-black/45 pb-2 text-xs uppercase tracking-[0.17em] transition-all hover:gap-11 hover:border-black"
+                    >
+                      View piece <span aria-hidden="true">→</span>
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  aria-label={`Open door ${piece.index}: ${piece.name}`}
+                  onFocus={() => setActivePiece(piece)}
+                  onClick={() => setActivePiece(piece)}
+                  className="flex h-full w-full flex-col items-center justify-between bg-transparent py-7 text-[#f2efe8] focus-visible:outline focus-visible:outline-1 focus-visible:outline-inset focus-visible:outline-[#f2efe8]"
+                >
+                  <span className="text-xs tracking-[0.18em] opacity-45">
+                    {piece.index}
+                  </span>
+                  <span className="[writing-mode:vertical-rl] rotate-180 [font-family:Times_New_Roman,Times,serif] text-[clamp(21px,1.7vw,29px)] leading-none">
+                    {piece.name}
+                  </span>
+                  <span className="text-sm opacity-45" aria-hidden="true">
+                    +
+                  </span>
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="mx-5 hidden border-t border-[#f2efe8]/20 max-[900px]:block">
+        {COLLECTION.map((piece) => {
+          const active = activePiece.slug === piece.slug;
+          const meaning = DOOR_MEANINGS[piece.slug];
+
+          return (
+            <article key={piece.slug} className="border-b border-[#f2efe8]/20">
+              <button
+                type="button"
+                aria-expanded={active}
+                onClick={() => setActivePiece(piece)}
+                className="grid w-full grid-cols-[42px_1fr_auto] items-center gap-4 bg-transparent py-6 text-left text-[#f2efe8]"
+              >
+                <span className="text-xs tracking-[0.16em] opacity-45">
+                  {piece.index}
+                </span>
+                <span className="[font-family:Times_New_Roman,Times,serif] text-[clamp(25px,7vw,37px)] leading-none">
+                  {piece.name}
+                </span>
+                <span className="text-xl font-light" aria-hidden="true">
+                  {active ? "−" : "+"}
+                </span>
+              </button>
+
+              {active && (
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                  className="pb-7"
+                >
+                  <div className="aspect-[4/5] overflow-hidden bg-[#d8d4cb]">
+                    <GarmentDrawing piece={piece} />
+                  </div>
+                  <div className="bg-[#d8d4cb] p-6 text-[#0b0b0b]">
+                    <p className="m-0 text-xs uppercase tracking-[0.18em] opacity-50">
+                      {meaning.title} · {piece.type} · {piece.color}
+                    </p>
+                    <p className="mb-0 mt-5 text-base leading-[1.7] text-black/65">
+                      {meaning.copy}
+                    </p>
+                    <Link
+                      href={`/shop/${piece.slug}`}
+                      className="mt-7 inline-flex items-center gap-7 border-b border-black/45 pb-2 text-xs uppercase tracking-[0.17em]"
+                    >
+                      View piece <span aria-hidden="true">→</span>
+                    </Link>
+                  </div>
+                </motion.div>
+              )}
+            </article>
+          );
+        })}
       </div>
     </section>
   );
@@ -300,7 +425,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <CollectionArchive />
+        <EightDoorsArchive />
 
         <section className="bg-[#f2efe8] px-[4vw] py-[11vw] text-[#0b0b0b] max-[900px]:px-5 max-[900px]:py-24">
           <Reveal>
