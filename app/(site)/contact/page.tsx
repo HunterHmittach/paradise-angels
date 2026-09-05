@@ -1,27 +1,30 @@
 "use client";
 
-import type { FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 
-const CONTACTS = [
+const CONVERSATIONS = [
   {
     number: "01",
+    roman: "I",
     label: "General",
-    email: "contact@paradiseangels.nl",
-    note: "Brand, collection and general enquiries",
+    title: "The house.",
+    note: "Questions about Paradise Angels, The First Wing or the world surrounding the collection.",
   },
   {
     number: "02",
+    roman: "II",
     label: "Orders",
-    email: "orders@paradiseangels.nl",
-    note: "Orders, delivery and aftercare",
+    title: "Aftercare.",
+    note: "Help with an order, delivery, return or the care of a Paradise Angels piece.",
   },
   {
     number: "03",
+    roman: "III",
     label: "Press & partnerships",
-    email: "contact@paradiseangels.nl",
-    note: "Editorial, creative and collaboration requests",
+    title: "Creative dialogue.",
+    note: "Editorial requests, partnerships and considered creative collaborations.",
   },
 ] as const;
 
@@ -71,6 +74,15 @@ function SignalLine() {
 
 export default function ContactPage() {
   const reduceMotion = useReducedMotion();
+  const [selectedTopic, setSelectedTopic] = useState("General");
+
+  function chooseDirection(topic: string) {
+    setSelectedTopic(topic);
+    document.getElementById("contact-form")?.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "center",
+    });
+  }
 
   return (
     <div className="min-h-screen overflow-clip bg-[#0b0b0b] [font-family:Arial,Helvetica,sans-serif]">
@@ -134,7 +146,11 @@ export default function ContactPage() {
                 <em className="font-normal">correspondence.</em>
               </h2>
 
-              <form onSubmit={openEmail} className="grid grid-cols-2 gap-x-7 max-[560px]:grid-cols-1">
+              <form
+                id="contact-form"
+                onSubmit={openEmail}
+                className="grid scroll-mt-[110px] grid-cols-2 gap-x-7 max-[560px]:grid-cols-1"
+              >
                 <label className="group border-b border-black/25 py-5">
                   <span className="block text-xs uppercase tracking-[0.17em] opacity-50">
                     01 · Name
@@ -168,7 +184,8 @@ export default function ContactPage() {
                   </span>
                   <select
                     name="topic"
-                    defaultValue="General"
+                    value={selectedTopic}
+                    onChange={(event) => setSelectedTopic(event.target.value)}
                     className="mt-3 w-full cursor-pointer rounded-none border-0 bg-transparent p-0 text-base outline-none"
                   >
                     <option>General</option>
@@ -213,35 +230,51 @@ export default function ContactPage() {
         <section className="bg-[#d8d4cb] px-[4vw] py-[10vw] text-[#0b0b0b] max-[900px]:px-5 max-[900px]:py-24">
           <div className="mb-16 grid grid-cols-[0.6fr_1.4fr] gap-8 max-[900px]:grid-cols-1">
             <p className="m-0 text-xs uppercase tracking-[0.22em] opacity-50">
-              Direct lines
+              Correspondence index
             </p>
             <h2 className="m-0 [font-family:Times_New_Roman,Times,serif] text-[clamp(49px,7vw,108px)] font-normal leading-[0.85] tracking-[-0.055em]">
-              Choose the right
+              Three paths.
               <br />
-              <em className="font-normal">door.</em>
+              <em className="font-normal">One house.</em>
             </h2>
           </div>
 
-          <div className="border-t border-black/20">
-            {CONTACTS.map((contact) => (
-              <a
-                key={contact.number}
-                href={`mailto:${contact.email}`}
-                className="group grid grid-cols-[70px_0.8fr_1.4fr_auto] items-center gap-6 border-b border-black/20 py-8 transition-[padding] duration-300 hover:px-3 max-[900px]:grid-cols-[50px_1fr_auto] max-[560px]:grid-cols-[40px_1fr]"
+          <div className="grid grid-cols-3 border-y border-black/20 max-[900px]:grid-cols-1">
+            {CONVERSATIONS.map((conversation, index) => (
+              <button
+                key={conversation.number}
+                type="button"
+                onClick={() => chooseDirection(conversation.label)}
+                className={`group flex min-h-[470px] flex-col items-start justify-between bg-transparent p-[3.5vw] text-left transition-colors duration-500 hover:bg-[#0b0b0b] hover:text-[#f2efe8] focus-visible:bg-[#0b0b0b] focus-visible:text-[#f2efe8] focus-visible:outline-none max-[900px]:min-h-[360px] max-[900px]:p-7 ${
+                  index > 0
+                    ? "border-l border-black/20 max-[900px]:border-l-0 max-[900px]:border-t"
+                    : ""
+                }`}
               >
-                <span className="text-xs tracking-[0.18em] opacity-45">
-                  {contact.number}
+                <span className="flex w-full items-center justify-between text-xs uppercase tracking-[0.18em] opacity-50">
+                  <span>{conversation.number} · {conversation.label}</span>
+                  <span aria-hidden="true">↑</span>
                 </span>
-                <span className="text-sm uppercase tracking-[0.14em]">
-                  {contact.label}
+
+                <span
+                  aria-hidden="true"
+                  className="my-8 block [font-family:Times_New_Roman,Times,serif] text-[clamp(105px,12vw,190px)] italic leading-[0.7] opacity-15 transition-opacity duration-500 group-hover:opacity-30"
+                >
+                  {conversation.roman}
                 </span>
-                <span className="text-base text-black/60 max-[900px]:hidden">
-                  {contact.note}
+
+                <span>
+                  <span className="block [font-family:Times_New_Roman,Times,serif] text-[clamp(35px,3.4vw,54px)] leading-[0.9]">
+                    {conversation.title}
+                  </span>
+                  <span className="mt-6 block max-w-[330px] text-base leading-[1.65] opacity-60">
+                    {conversation.note}
+                  </span>
+                  <span className="mt-9 inline-flex items-center gap-7 border-b border-current/40 pb-2 text-xs uppercase tracking-[0.16em]">
+                    Choose this direction <span aria-hidden="true">↑</span>
+                  </span>
                 </span>
-                <span className="[font-family:Times_New_Roman,Times,serif] text-[clamp(20px,2vw,31px)] max-[560px]:col-start-2 max-[560px]:break-all">
-                  {contact.email} <span aria-hidden="true">↗</span>
-                </span>
-              </a>
+              </button>
             ))}
           </div>
         </section>
