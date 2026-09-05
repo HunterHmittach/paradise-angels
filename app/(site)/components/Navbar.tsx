@@ -3,12 +3,15 @@
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import supabase from "@/lib/supabase";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [accessOpen, setAccessOpen] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
+  const [requestLoading, setRequestLoading] = useState(false);
+  const [requestError, setRequestError] = useState("");
 
   const collectionActive = pathname.startsWith("/shop");
   const storyActive = pathname.startsWith("/about");
@@ -34,11 +37,40 @@ export default function Navbar() {
   function openAccess() {
     setMenuOpen(false);
     setRequestSent(false);
+    setRequestLoading(false);
+    setRequestError("");
     setAccessOpen(true);
   }
 
-  function submitAccessRequest(event: FormEvent<HTMLFormElement>) {
+  async function submitAccessRequest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    const form = new FormData(event.currentTarget);
+    const name = String(form.get("name") || "").trim();
+    const email = String(form.get("email") || "").trim().toLowerCase();
+
+    if (!name || !email) return;
+
+    setRequestLoading(true);
+    setRequestError("");
+
+    const { error } = await supabase.from("access_requests").insert({
+      name,
+      email,
+    });
+
+    setRequestLoading(false);
+
+    // A repeated request receives the same success screen. This avoids
+    // exposing whether an email address is already registered.
+    if (error && error.code !== "23505") {
+      console.error("Private access request failed:", error);
+      setRequestError(
+        "We could not save your request. Please try again in a moment.",
+      );
+      return;
+    }
+
     setRequestSent(true);
   }
 
@@ -167,6 +199,9 @@ export default function Navbar() {
                       name="name"
                       autoComplete="name"
                       required
+                      minLength={2}
+                      maxLength={80}
+                      disabled={requestLoading}
                       className="min-h-[45px] rounded-none border-0 border-b border-black/[0.17] bg-transparent outline-none focus:border-black"
                     />
                   </label>
@@ -177,18 +212,32 @@ export default function Navbar() {
                       type="email"
                       autoComplete="email"
                       required
+                      maxLength={254}
+                      disabled={requestLoading}
                       className="min-h-[45px] rounded-none border-0 border-b border-black/[0.17] bg-transparent outline-none focus:border-black"
                     />
                   </label>
                   <button
                     type="submit"
-                    className="mt-4 flex min-h-[52px] items-center justify-between border border-black bg-black px-6 text-[9px] uppercase tracking-[0.16em] text-[#f2efe8]"
+                    disabled={requestLoading}
+                    className="mt-4 flex min-h-[52px] items-center justify-between border border-black bg-black px-6 text-[9px] uppercase tracking-[0.16em] text-[#f2efe8] disabled:cursor-wait disabled:opacity-60"
                   >
-                    <span>Submit request</span>
+                    <span>
+                      {requestLoading ? "Submitting..." : "Submit request"}
+                    </span>
                     <span aria-hidden="true">→</span>
                   </button>
-                  <p className="text-[9px] text-[#69655f]">
-                    Prototype preview: no details are transmitted or stored yet.
+                  {requestError && (
+                    <p
+                      role="alert"
+                      className="m-0 text-[10px] leading-relaxed text-[#8a2020]"
+                    >
+                      {requestError}
+                    </p>
+                  )}
+                  <p className="text-[9px] leading-relaxed text-[#69655f]">
+                    By submitting, you ask Paradise Angels to contact you about
+                    access to The First Wing.
                   </p>
                 </form>
               </>
@@ -196,7 +245,7 @@ export default function Navbar() {
               <div className="grid min-h-[285px] place-items-center text-center">
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.2em] text-[#69655f]">
-                    Request noted
+                    Request received
                   </p>
                   <h2 className="[font-family:Times_New_Roman,Times,serif] text-5xl font-normal leading-[0.9]">
                     Until the door opens.
